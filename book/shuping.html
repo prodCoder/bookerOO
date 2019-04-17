@@ -1,0 +1,373 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #main .relative {
+        position: relative;
+    }
+    #main .starwarp {
+        width: 80px;
+        height: 15px;
+        display: block;
+        overflow: hidden;
+        position: absolute;
+        left: 0;
+    }
+
+    #main .starred,
+    #main .starban {
+        position: absolute;
+        left: 0;
+    }
+
+    .starban {
+        width: 100%;
+        background: url("../image/icon/starban.png") no-repeat 0 0;
+        z-index: 3;
+    }
+
+    .starred {
+        width: 0;
+        z-index: 4;
+        background: url("../image/icon/starred.png") no-repeat 0 0 transparent;
+    }
+    #shupingcontent {
+        margin: 0.2rem 0;
+        border: 1px solid #f1f1f1;
+        min-height: 150px;
+        padding:0.2rem;
+        display: block;
+    }
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="shupingback()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title"></div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main"></div>
+    <script type="text/x-dot-template" id="main-temp">
+        <div class="aui-row aui-padded-b-10 aui-padded-t-10 aui-margin-t-0 aui-background-white aui-padding-t-10">
+            <div class="aui-col-xs-4">
+                <img src="{{? it.bookinfo.image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.bookinfo.image}}{{??}}../image/book.png{{?}}" style="width:80%;margin-left:8px;" />
+            </div>
+            <div class="aui-col-xs-8">
+                <h2 class="aui-font-size-16">{{=it.bookinfo.book_name}}</h2>
+                <div class="">
+                    <span class="aui-text-default aui-font-size-12 " tapmode onclick="openauthor({{=it.bookinfo.uid}},'{{=it.bookinfo.author}}')">{{=it.bookinfo.author}}</span>
+                    <p class="aui-font-size-12 aui-ellipsis-2">{{=it.bookinfo.desco || ''}}</p>
+                </div>
+            </div>
+        </div>
+        <ul class="aui-list aui-form-list aui-margin-t-0 aui-list-noborder" id="postarea">
+            <li class="aui-list-item" tapmode onclick="islogin()">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-input">
+                        <textarea placeholder="觉得本书怎么样，发个书评让作者看到" id="shupingcontent"></textarea>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="postshuping()">
+                <div class="aui-list-item-inner aui-list-item-center aui-list-item-btn">
+                    <div class="aui-btn aui-btn-danger aui-btn-block aui-btn-sm aui-margin-r-5">发个书评</div>
+                </div>
+            </li>
+        </ul>
+        {{? it.pinglun && it.pinglun.length}}
+          <div class="aui-background-white aui-margin-t-5 aui-padded-l-5 aui-margin-b-0 aui-padded-t-10 aui-padded-b-0 aui-font-size-16">
+              共{{=it.pinglunnums}}条评论
+          </div>
+          <div id="shupinglist">
+            {{ for(var i=0,len=it.pinglun.length;i<len;i++) { }}
+              <div class="aui-card-list aui-margin-b-0 aui-hr-after">
+                <div class="aui-card-list-header aui-card-list-user aui-border-t">
+                    <div class="aui-card-list-user-avatar">
+                        <img src="{{=it.pinglun[i].avatar}}" class="aui-img-round" />
+                    </div>
+                    <div class="aui-card-list-user-name">
+                        <div>{{=it.pinglun[i].author}}</div>
+                    </div>
+                    <div class="aui-card-list-user-info"></div>
+                </div>
+                <div class="aui-card-list-content-padded">{{=it.pinglun[i].text}}</div>
+                <div class="aui-card-list-footer">
+                    <div><i {{? indexSetting.dianping.indexOf(it.pinglun[i].dp_id)===-1}} onclick="dianping({{=it.pinglun[i].dp_id}},'zhichi')" {{?}} class="fa fa-thumbs-o-up" id="dpid_{{=it.pinglun[i].dp_id}}_zhichi">{{=it.pinglun[i].zhichi}}</i> </div>
+                    <div>
+                        <i {{? indexSetting.dianping.indexOf(it.pinglun[i].dp_id)===- 1}} onclick="dianping({{=it.pinglun[i].dp_id}},'fandui')" {{?}} class="fa fa-thumbs-o-down" id="dpid_{{=it.pinglun[i].dp_id}}_fandui">{{=it.pinglun[i].fandui}}</i>
+                    </div>
+                    <div><i class="fa "></i> {{=it.pinglun[i].time}}</div>
+                </div>
+              </div>
+            {{ } }}
+          </div>
+        {{?}}
+    </script>
+    <script type="text/x-dot-template" id="shupinglist-temp">
+    {{? it.pinglun && it.pinglun.length}}
+        {{ for(var i=0,len=it.pinglun.length;i<len;i++) { }}
+          <div class="aui-card-list aui-margin-b-0 aui-hr-after">
+            <div class="aui-card-list-header aui-card-list-user aui-border-t">
+                <div class="aui-card-list-user-avatar">
+                    <img src="{{=it.pinglun[i].avatar}}" class="aui-img-round" />
+                </div>
+                <div class="aui-card-list-user-name">
+                    <div>{{=it.pinglun[i].author}}</div>
+                </div>
+                <div class="aui-card-list-user-info"></div>
+            </div>
+            <div class="aui-card-list-content-padded aui-margin-t-5">{{=it.pinglun[i].text}}</div>
+            <div class="aui-card-list-footer">
+                <div>
+                  <i {{? indexSetting.dianping.indexOf(it.pinglun[i].dp_id)===-1}} onclick="dianping({{=it.pinglun[i].dp_id}},'zhichi')" {{?}} class="fa fa-thumbs-o-up" id="dpid_{{=it.pinglun[i].dp_id}}_zhichi">{{=it.pinglun[i].zhichi}}</i> </div>
+                <div>
+                    <i {{? indexSetting.dianping.indexOf(it.pinglun[i].dp_id)===- 1}} onclick="dianping({{=it.pinglun[i].dp_id}},'fandui')" {{?}} class="fa fa-thumbs-o-down" id="dpid_{{=it.pinglun[i].dp_id}}_fandui">{{=it.pinglun[i].fandui}}</i>
+                </div>
+                <div><i class="fa "></i> {{=it.pinglun[i].time}}</div>
+            </div>
+          </div>
+        {{ } }}
+      {{?}}
+    </script>
+    <script type="text/x-dot-template" id="newshuping-temp">
+          <div class="aui-card-list aui-margin-b-0 aui-hr-after">
+            <div class="aui-card-list-header aui-card-list-user aui-border-t">
+                <div class="aui-card-list-user-avatar">
+                    <img src="{{=it.avatar}}" class="aui-img-round" />
+                </div>
+                <div class="aui-card-list-user-name">
+                    <div>{{=it.name}}</div>
+                </div>
+                <div class="aui-card-list-user-info"></div>
+            </div>
+            <div class="aui-card-list-content-padded aui-margin-t-5">{{=it.text}}</div>
+            <div class="aui-card-list-footer">
+                <div>
+                  <i  class="fa fa-thumbs-o-up">0</i> </div>
+                <div>
+                    <i class="fa fa-thumbs-o-down">0</i>
+                </div>
+                <div><i class="fa "></i> 刚刚</div>
+            </div>
+          </div>
+    </script>
+    <div id="loading" class="aui-hide aui-text-center aui-margin-10"><span class="fa-2x fa fa-spinner fa-spin"></span></div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.loading = false;
+indexSetting.current = 1;
+indexSetting.total = 2;
+indexSetting.first = false;
+if ($api.getStorage('dianping')) {
+    indexSetting.dianping = $api.getStorage('dianping');
+} else {
+    indexSetting.dianping = [];
+}
+if ($api.getStorage('zhichi')) {
+    indexSetting.zhichi = $api.getStorage('zhichi');
+} else {
+    indexSetting.zhichi = [];
+}
+if ($api.getStorage('fandui')) {
+    indexSetting.fandui = $api.getStorage('fandui');
+} else {
+    indexSetting.fandui = [];
+}
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    indexSetting.book_id = api.pageParam.book_id ? api.pageParam.book_id : 0;
+    indexSetting.book_name = api.pageParam.book_name;
+    indexSetting.from = api.pageParam.from;
+    $api.text($api.byId('title'), '[书评]' + indexSetting.book_name);
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            shupingback();
+        }
+    });
+    initload();
+    api.addEventListener({
+        name: 'scrolltobottom',
+        extra: {
+            threshold: 20
+        }
+    }, function(ret, err) {
+        if (!indexSetting.loading) {
+            indexSetting.loading = true;
+            $api.removeCls($api.byId('loading'), 'aui-hide');
+            if (indexSetting.total >= indexSetting.current) {
+                initload();
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+            }
+            indexSetting.loading = false;
+        }
+    });
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+
+function islogin() {
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    if (indexSetting.userinfo.uid < 1 || indexSetting.userinfo.bbsuid < 1) {
+        tixinglogin();
+        return false;
+    }
+}
+
+function tixinglogin() {
+    var dialog = new auiDialog({})
+    dialog.alert({
+        title: '请登录',
+        msg: '请登录后再发书评！',
+        buttons: ['取消', '去登录']
+    }, function(ret) {
+        if (ret) {
+            if (ret.buttonIndex == 2) {
+                openwin('login', {
+                    from: "shuping",
+                    book_id: indexSetting.book_id
+                })
+            }
+        }
+    });
+
+}
+
+function postshuping() {
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    var text = $api.trim($api.val($api.byId('shupingcontent')));
+    if (!text) {
+        toast.fail({
+            title: '必须输入内容',
+            duration: 2000
+        });
+        return;
+    }
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=postshuping&param=book_id----' + indexSetting.book_id + ',bbsuid----' + indexSetting.userinfo.bbsuid + ',text----' + text,
+        method: 'post'
+    }, function(ret, err) {
+        if (ret.status) {
+          $api.val($api.byId('shupingcontent'),'');
+            var temp = $api.text($api.byId("newshuping-temp"));
+            var dottemp = doT.template(temp);
+            var html = dottemp({
+              text:text,
+              name:indexSetting.userinfo.name,
+              avatar:indexSetting.userinfo.avatar
+            });
+            if($api.byId('shupinglist')){
+              $api.prepend($api.byId('shupinglist'), html);
+            }else{
+              $api.after($api.byId('postarea'), html);
+            }
+            toast.success({
+              title: '发布成功',
+              duration: 2000
+            });
+        } else {
+            toast.fail({
+                title: '发布失败',
+                duration: 2000
+            });
+        }
+    });
+}
+
+function shupingback() {
+    if (indexSetting.from && (indexSetting.from == 'read')) {
+        api.setFullScreen({
+            fullScreen: true
+        });
+        api.execScript({
+            name: 'read',
+            frameName: 'readset',
+            script: 'api.closeFrame()'
+        });
+        back();
+    } else {
+        back();
+    }
+}
+
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=shuping&param=book_id----' + indexSetting.book_id + ',current----' + indexSetting.current,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                indexSetting.current++;
+                indexSetting.total = ret.total;
+                if (indexSetting.first === false) {
+                    var temp = $api.text($api.byId("main-temp"));
+                    var dottemp = doT.template(temp);
+                    var html = dottemp(ret);
+                    $api.html($api.byId('main'), html);
+                    indexSetting.first = true;
+                } else if(ret.pinglun.length){
+                    var temp = $api.text($api.byId("shupinglist-temp"));
+                    var dottemp = doT.template(temp);
+                    var html = dottemp(ret);
+                    $api.append($api.byId('shupinglist'), html);
+                }else{
+                  $api.html($api.byId('loading'), '没有了');
+                }
+                setTimeout(function() {
+                    for (var k = 0, klen = ret.pinglun.length; k < klen; k++) {
+                        if (indexSetting.dianping.indexOf(parseInt(ret.pinglun[k].dp_id)) != -1) {
+                            if (indexSetting.zhichi.indexOf(parseInt(ret.pinglun[k].dp_id)) != -1) {
+                                $api.addCls($api.byId('dpid_' + ret.pinglun[k].dp_id + '_zhichi'), 'aui-text-danger');
+                            } else if (indexSetting.fandui.indexOf(parseInt(ret.pinglun[k].dp_id)) != -1) {
+                                $api.addCls($api.byId('dpid_' + ret.pinglun[k].dp_id + '_fandui'), 'aui-text-danger');
+                            }
+                        }
+                    }
+                }, 300);
+            }
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+</script>
+</html>

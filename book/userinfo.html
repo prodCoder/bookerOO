@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title"></div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main">
+        <div style="height: 220px;">&nbsp;</div>
+        <div id="loginstatus"></div>
+        <ul class="aui-list aui-list-in aui-margin-t-10">
+            <li class="aui-list-item" tapmode onclick="openwin('myfavores')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-trophy fa-lg fa-fw aui-text-danger"></i>收藏的图书</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">所有收藏的图书</div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwin('myguanzhu')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-trophy fa-lg fa-fw aui-text-danger"></i>关注的作者</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">关注的作者列表</div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div id="logoutbutton" class="aui-content-padded aui-margin-t-10 aui-hide" onclick="logout()">
+            <div class="aui-btn aui-btn-block aui-btn-danger">退出登录</div>
+        </div>
+    </div>
+    <script type="text/x-dot-template" id="logintype-temp">
+        <div class="aui-card-list aui-margin-b-0">
+            <div class="aui-card-list-header aui-text-center">当前使用<span class="aui-text-primary">{{? it.dqlogintype=='qq'}}[QQ]{{??}}[论坛]{{?}}</span>帐号 <span class="aui-text-danger">{{=it.name}}</span>登录</div>
+            {{? it.bbsuid > 0 && it.dqlogintype =='qq' && it.forumname}}
+            <div class="aui-card-list-content-padded aui-text-center">
+                <div class="aui-btn aui-btn-sm aui-btn-block ">网站帐号{{=it.forumname}}{{? /^app_/.test(it.forumname)}}/默认密码123456{{?}}</div>
+            </div>
+            {{?}}
+        </div>
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.first = false;
+apiready = function() {
+    autocheckyejian();
+    api.parseTapmode();
+    $api.fixStatusBar($api.dom('header'));
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    indexSetting.from = api.pageParam.from;
+    indexSetting.book_id = api.pageParam.book_id;
+    $api.text($api.byId('title'), indexSetting.userinfo.name);
+    initload();
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+
+function logout() {
+    $api.setStorage('userinfo', {
+        avatar: "../image/liulangnan.png",
+        uid: 0,
+        bbsuid: 0,
+        name: "游客",
+        group: "登录帐号,记录点滴阅读",
+        time: (new Date().getTime())
+    });
+    api.execScript({
+        name: 'root',
+        frameName: 'store',
+        script: "$api.attr($api.byId('avatar'),'src','../image/liulangnan.png');indexSetting.userinfo = $api.getStorage('userinfo');checkstatus();"
+    });
+    toast.success({
+        title: "已退出登录",
+        duration: 3000
+    });
+    back();
+}
+function initload() {
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    var appinfo = $api.getStorage('appinfo');
+    var temp = $api.text($api.byId("logintype-temp"));
+    var dottemp = doT.template(temp);
+    var html = dottemp(indexSetting.userinfo);
+    showuser(indexSetting.userinfo);
+    $api.html($api.byId('loginstatus'), html);
+}
+
+function showuser(info) {
+    var personalCenter = api.require('personalCenter');
+    if (indexSetting.userinfo.bbsuid < 1) {
+        if ($api.getStorage('localstore')) {
+            var localstore = $api.getStorage('localstore');
+            info.shoucang = parseInt(localstore.data.length);
+        }
+    }
+    var btnArray = [{
+        'bgImg': 'widget://image/icon/trans.png',
+        'selectedImg': 'widget://image/icon/trans2.png',
+        'lightImg': 'widget://image/icon/trans2.png',
+        'title': info.dstrametitle,
+        'count': info.dstramenums?parseInt(info.dstramenums):0,
+        "titleColor": "#ffffff",
+        "titleLightColor": "#ffffff",
+        "countColor": "#ffffff",
+        "countLightColor": "#ffffff"
+    }, {
+        'bgImg': 'widget://image/icon/trans.png',
+        'selectedImg': 'widget://image/icon/trans2.png',
+        'lightImg': 'widget://image/icon/trans2.png',
+        'title': '收藏',
+        'count': parseInt(info.shoucang)?parseInt(info.shoucang):0,
+        "titleColor": "#ffffff",
+        "titleLightColor": "#ffffff",
+        "countColor": "#ffffff",
+        "countLightColor": "#ffffff"
+    }, {
+        'bgImg': 'widget://image/icon/trans.png',
+        'selectedImg': 'widget://image/icon/trans2.png',
+        'lightImg': 'widget://image/icon/trans2.png',
+        'title': info.trametitle,
+        'count': info.tramenums?parseInt(info.tramenums):0,
+        "titleColor": "#ffffff",
+        "titleLightColor": "#ffffff",
+        "countColor": "#ffffff",
+        "countLightColor": "#ffffff"
+    }];
+    personalCenter.open({
+        'y': parseInt($api.offset($api.byId('header')).h),
+        'imgPath': indexSetting.userinfo.avatar,
+        'placeholderImg': 'widget://image/liulangnan.png',
+        'userName': indexSetting.userinfo.name,
+        'count': 0,
+        "fixedOn": api.frameName,
+        'btnArray': btnArray,
+        'showLeftBtn': false,
+        'showRightBtn': false,
+        'userNameSize': 16,
+        'userColor': '#ffff00',
+        'subTitle': "",
+        'fixed': false
+
+    }, function(ret, err) {});
+    if (indexSetting.userinfo.uid) {
+        $api.removeCls($api.byId('logoutbutton'), 'aui-hide');
+    }
+}
+</script>
+</html>

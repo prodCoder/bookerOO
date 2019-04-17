@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title">我的关注</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main">
+        <ul class="aui-list aui-media-list aui-list-noborder" id="indexlist"></ul>
+        <div id="loading" class="aui-hide aui-text-center"><span class=" fa fa-spinner fa-spin fa-2x"></span></div>
+    </div>
+    <script id="indexlist-temp" type="text/x-dot-template">
+      {{? it.data}}
+        {{ for(var i=0,len=it.data.length;i<len;i++) { }}
+        <li class="aui-list-item aui-margin-b-10" tapmode onclick="openauthor({{=it.data[i].uid}},'{{=it.data[i].author}}')">
+            <div class="aui-media-list-item-inner">
+                <div class="aui-list-item-media">
+                    <img src="{{=it.data[i].avatar}}" class="aui-img-round">
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">{{=it.data[i].author}}</div>
+                    </div>
+                    <div class="aui-list-item-text">
+                        共创作图书[{{=it.data[i].tushunums}}]部
+                    </div>
+                </div>
+            </div>
+        </li>
+        {{ } }}
+      {{??}}
+        <li class="aui-list-header">你还没有关注任何作者</li>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.guanzhuinfo = $api.getStorage('guanzhuinfo') ? $api.getStorage('guanzhuinfo') : (new Array());
+indexSetting.loading = false;
+indexSetting.current = 1;
+indexSetting.total = 2;
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    initload();
+    api.addEventListener({
+        name: 'scrolltobottom',
+        extra: {
+            threshold: 20
+        }
+    }, function(ret, err) {
+        if (!indexSetting.loading) {
+            indexSetting.loading = true;
+            $api.removeCls($api.byId('loading'), 'aui-hide');
+            if (indexSetting.total >= indexSetting.current) {
+                initload();
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+            }
+            indexSetting.loading = false;
+        }
+    });
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+};
+
+//  初始化
+function initload() {
+    var local = '';
+    if (indexSetting.userinfo.bbsuid < 1) {
+        local = indexSetting.guanzhuinfo.join('__');
+    }
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=myguanzhu&param=current----' + indexSetting.current + ',uid----' + indexSetting.userinfo.bbsuid + ',local----' + local,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                indexSetting.current += 1;
+                indexSetting.total = ret.total;
+                var temp = $api.text($api.byId("indexlist-temp"));
+                var dottemp = doT.template(temp);
+                var html = dottemp(ret);
+                $api.append($api.byId('indexlist'), html);
+            } else {
+                if (indexSetting.current < 2) {
+                    $api.html($api.byId('loading'), '你没有关注的作者');
+                } else {
+                    $api.html($api.byId('loading'), '没有了');
+                }
+
+                $api.removeCls($api.byId('loading'), 'aui-hide');
+            }
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+</script>
+</html>

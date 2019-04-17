@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    .aui-tab-item{border-bottom: 1px solid #f1f1f1;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title">名人堂</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main">
+        <div class="aui-tab" id="tab">
+            <div class="aui-tab-item aui-active" id="hotzzbutton" onclick="togglezz('hot')">热门作者</div>
+            <div class="aui-tab-item" id="newzzbutton" onclick="togglezz('new')">新人推荐</div>
+        </div>
+        <ul class="aui-list aui-media-list" id="indexlist"></ul>
+        <div id="loading" class="aui-hide aui-text-center"><span class="fa-2x fa fa-spinner fa-spin"></span></div>
+    </div>
+    <script id="indexlist-temp" type="text/x-dot-template">
+      {{? it.data.length}}
+        {{ for(var i=0,len=it.data.length;i<len;i++) { }}
+          <div class="aui-card-list aui-margin-b-0">
+            <div tapmode onclick="openauthor({{=it.data[i].uid}},'{{=it.data[i].author}}')" class="aui-card-list-header aui-card-list-user aui-border-t">
+                <div class="aui-card-list-user-avatar">
+                    <img src="{{=it.data[i].avatar}}" class="aui-img-round" />
+                </div>
+                <div class="aui-card-list-user-name">
+                    <span class="aui-font-size-14">[{{=it.data[i].author}}]</span>
+                </div>
+                <div class="aui-card-list-user-info">
+                共创作图书<span class="aui-text-danger">{{=it.data[i].nums}}</span>部
+                |
+                粉丝
+                <span class="aui-text-danger">{{=it.data[i].fensinums}}</span>
+                </div>
+            </div>
+          </div>
+          {{ } }}
+        {{??}}
+          <h1 class="aui-text-center aui-text-danger">暂无推荐作者</h1>
+        {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.loading = false;
+indexSetting.current = 1;
+indexSetting.total = 2;
+indexSetting.zztype = 'hot';
+indexSetting.first = 1;
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    initload();
+    api.addEventListener({
+        name: 'scrolltobottom',
+        extra: {
+            threshold: 20
+        }
+    }, function(ret, err) {
+        if (!indexSetting.loading) {
+            indexSetting.loading = true;
+            $api.removeCls($api.byId('loading'), 'aui-hide');
+            if (indexSetting.total >= indexSetting.current) {
+                initload();
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+            }
+            indexSetting.loading = false;
+        }
+    });
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+}
+
+function togglezz(type) {
+    indexSetting.current = 1;
+    indexSetting.total = 2;
+    indexSetting.zztype = type;
+    indexSetting.first = 1;
+    $api.addCls($api.byId(type + 'zzbutton'), 'aui-active');
+    $api.removeCls($api.byId('loading'), 'aui-hide');
+    $api.html($api.byId('indexlist'), '');
+    var rmtype;
+    if (type == 'new') {
+        rmtype = 'hot';
+    } else {
+        rmtype = 'new';
+    }
+    $api.removeCls($api.byId(rmtype + 'zzbutton'), 'aui-active');
+    initload();
+}
+
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=zzlist&param=zztype----' + indexSetting.zztype + ',current----' + indexSetting.current,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                indexSetting.current += 1;
+                indexSetting.total = ret.total;
+                var temp = $api.text($api.byId("indexlist-temp"));
+                var dottemp = doT.template(temp);
+                var html = dottemp(ret);
+                if (indexSetting.first == 1) {
+                    $api.html($api.byId('indexlist'), html);
+                } else {
+                    $api.append($api.byId('indexlist'), html);
+                }
+                $api.addCls($api.byId('loading'), 'aui-hide');
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+                $api.removeCls($api.byId('loading'), 'aui-hide');
+            }
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+            $api.addCls($api.byId('loading'), 'aui-hide');
+        }
+    });
+}
+</script>
+</html>

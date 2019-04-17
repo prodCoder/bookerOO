@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    .h1-title{margin:0;color: #242424;font-size: 0.85rem;padding-top: 8px;padding-bottom: 5px;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title">排行榜</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main"></div>
+    <script id="main-temp" type="text/x-dot-template">
+      {{? it.phdata}}
+        <ul class="aui-list aui-list-noborder">
+          {{ for(var i=0,len=it.phdata.length;i<len;i++) { }}
+            <li class="aui-list-item aui-margin-t-0" tapmode onclick="paihanginfo({{=it.phdata[i].id}},'{{=it.phdata[i].phname}}')">
+              <h1 class="h1-title aui-font-size-16 aui-text-danger">
+                <i class="fa fa-ellipsis-v"></i>
+                {{? it.phdata[i].phname=='yuedu'}}阅读榜
+                {{?? it.phdata[i].phname=='jingxuan'}}精选榜
+                {{?? it.phdata[i].phname=='shoucang'}}收藏榜
+                {{?? it.phdata[i].phname=='paihang'}}排行榜
+                {{?? it.phdata[i].phname=='haoping'}}
+                好评榜
+                {{?}}
+              </h1>
+            </li>
+            {{ for(var j=0,jlen=it.phdata[i].data.length;j<jlen;j++){ }}
+            <li class="aui-list-item" tapmode onclick="openbook({{=it.phdata[i].data[j].book_id}})">
+              <div class="aui-list-item-inner">
+                  <div class="aui-list-item-title aui-font-size-14">{{=it.phdata[i].data[j].book_name}}</div>
+                  <div class="aui-list-item-right">
+                      <div class="aui-label aui-label-danger aui-padded-l-5 aui-padded-r-5">{{=(j+1)}}</div>
+                  </div>
+              </div>
+            </li>
+            {{ } }}
+          {{ } }}
+        </ul>
+      {{??}}
+        <h1 class="aui-text-danger aui-text-center">当前无排行数据</h1>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+    autocheckyejian();
+    api.parseTapmode();
+    $api.fixStatusBar($api.dom('header'));
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    initload();
+};
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=paihang',
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            var temp = $api.text($api.byId("main-temp"));
+            var dottemp = doT.template(temp);
+            var html = dottemp(ret);
+            $api.html($api.byId('main'), html);
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+
+function paihanginfo(id, name) {
+    openwin('paihanginfo', {
+            paihangid: id,
+            name: name
+        })
+}
+</script>
+</html>

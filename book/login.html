@@ -1,0 +1,506 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <script type="text/javascript" src="../script/api.js"></script>
+    <script type="text/javascript" src="../script/aui-toast.js"></script>
+    <style type="text/css">
+    #main .aui-btn-disabled {
+        background: #757575;
+    }
+    .aui-tab-item{border-bottom: 1px solid #f1f1f1;}
+    </style>
+</head>
+<body>
+  <header class="aui-bar aui-bar-nav" id="header">
+      <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+          <span class="aui-iconfont aui-icon-left"></span>
+      </a>
+      <div class="aui-title">登录&注册</div>
+      <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+          <span class="aui-iconfont aui-icon-search"></span>
+      </a>
+  </header>
+    <div id="main">
+        <div class="aui-tab" id="auitab">
+            <div class="aui-tab-item aui-active" onclick="qiehuan('loginform',0)" data-id="">登录</div>
+            <div class="aui-tab-item" onclick="qiehuan('regitform',1)" data-id="">手机号注册</div>
+            <div class="aui-tab-item" onclick="qiehuan('yhregitform',2)" data-id="">用户名注册</div>
+        </div>
+        <div id="loginform" class="aui-tab-menu">
+            <ul class="aui-list aui-form-list aui-list-noborder">
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label">
+                            用户/手机
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="text" placeholder="输入用户名" id="username">
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label">
+                            密码
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="password" placeholder="输入密码" id="password">
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner aui-list-item-center aui-list-item-btn" tapmode onclick="login()">
+                        <div class="aui-btn aui-btn-block  aui-btn-danger aui-margin-r-5">登录</div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div tapmode onclick="checkinstall('qq')" class="aui-margin-t-10 aui-margin-b-5 aui-text-primary">
+                      <i class="aui-iconfont aui-icon-qq"></i>QQ登录
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div id="regitform" class="aui-hide aui-tab-menu">
+            <ul class="aui-list aui-form-list aui-list-noborder">
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label">
+                            手机号
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="text" id="regusername" placeholder="请输入手机号" />
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item" id="yanzhengmali">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-input">
+                            <input type="text" placeholder="输入验证码" id="yanzhengma" />
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="button" value="获取验证码" tapmode onclick="getyanzhengma()" class="aui-btn aui-btn-sm aui-btn-danger" id="getyanzhengmaid" />
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label">
+                            输入密码
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="password" placeholder="设定你的密码" id="regpassword">
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner aui-list-item-center aui-list-item-btn" tapmode onclick="reguser('mob')">
+                        <div class="aui-btn aui-btn-block aui-btn-danger aui-margin-r-5" id="regitbutton">注册</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div id="yhregitform" class="aui-hide aui-tab-menu">
+            <ul class="aui-list aui-form-list aui-list-noborder">
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label">
+                            用户名
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="text" id="yhregusername" placeholder="由字母数字下划线组成" />
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label">
+                            输入密码
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="password" placeholder="设定你的密码" id="yhregpassword">
+                        </div>
+                    </div>
+                </li>
+                <li class="aui-list-item">
+                    <div class="aui-list-item-inner aui-list-item-center aui-list-item-btn" tapmode onclick="reguser('user')">
+                        <div class="aui-btn aui-btn-block aui-btn-danger aui-margin-r-5" id="">注册</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+<script type="text/javascript">
+var toast = new auiToast({});
+function qiehuan(id,key){
+  var domall = $api.domAll(".aui-tab-menu");
+  var taball = $api.domAll(".aui-tab-item");
+  if (domall) {
+      for (var i = 0, len = domall.length; i < len; i++) {
+        if( i!=key ){
+          $api.addCls(domall[i], 'aui-hide');
+          $api.removeCls(taball[i], 'aui-active');
+        }else{
+          $api.addCls(taball[i], 'aui-active');
+          $api.removeCls(domall[i], 'aui-hide')
+        }
+      }
+  }
+}
+var dtimer = null;
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.timeva = 59;
+apiready = function() {
+  $api.fixStatusBar($api.dom('header'));
+  api.parseTapmode();
+    autocheckyejian();
+    indexSetting.book_id = api.pageParam.book_id;
+    indexSetting.from = api.pageParam.from;
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    //注册
+    indexSetting.sms = api.require('smsVerify');
+    indexSetting.sms.register(function(ret, err) {
+        if (!ret.status) {
+            $api.addCls($api.byId('regitbutton'), 'aui-btn-disable');
+            $api.text($api.byId('regitbutton'), '暂不可注册');
+        }
+    });
+};
+
+function getyanzhengma() {
+    if ($api.hasCls($api.byId('getyanzhengmaid'), 'aui-btn-disabled')) {
+        return;
+    }
+    var mobile = parseInt($api.val($api.byId('regusername')));
+    if (!/^\d{11}$/.test(mobile)) {
+        toast.fail({
+            title: "手机号不得为空",
+            duration: 2000
+        });
+        return false;
+    }
+    toast.success({
+        title: '短信发送中',
+        duration: 1000
+    });
+    daojishi();
+    indexSetting.sms.sms({
+        phone: mobile,
+        country: "86"
+    }, function(ret, err) {
+      toast.hide();
+        if (ret.status) {
+          $api.addCls($api.byId('getyanzhengmaid'), 'aui-btn-disabled');
+            toast.success({
+                title: '短信发送成功',
+                duration: 2000
+            });
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+            return false;
+        }
+    });
+}
+
+function daojishi() {
+  clearTimeout(dtimer);
+    if (indexSetting.timeva > 1) {
+        indexSetting.timeva--;
+        $api.val($api.byId('getyanzhengmaid'), indexSetting.timeva + '秒后重发');
+        dtimer = setTimeout(function() {
+            daojishi();
+        }, 1000);
+    } else {
+        indexSetting.timeva = 59;
+        $api.removeCls($api.byId('getyanzhengmaid'), 'aui-btn-disabled');
+        $api.val($api.byId('getyanzhengmaid'), '获取验证码');
+    }
+}
+
+function login() {
+    var username = $api.trim($api.val($api.byId('username')));
+    var password = $api.trim($api.val($api.byId('password')));
+    if (!username || !password) {
+        toast.fail({
+            title: !username?"必须填写用户名":'必须输入密码',
+            duration: 2000
+        });
+        return false;
+    }
+    toast.loading({
+        title:"登陆中",
+        duration:2000
+    })
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=login&param=username----' + (username) + ',pass----' + ('uslzkw' + password + 'aqlcje'),
+        method: 'get'
+    }, function(ret2, err2) {
+        toast.hide();
+        if (ret2.status) {
+            toast.success({
+                title: "登录成功",
+                duration: 2000
+            });
+            $api.setStorage('userinfo', ret2.data);
+            api.execScript({
+                name: 'root',
+                frameName: 'store',
+                script: "checkstatus();indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();$api.attr($api.byId('avatar'),'src','" + ret2.data.avatar + "')"
+            });
+            if (indexSetting.from == 'book') {
+                api.execScript({
+                    name: 'book_' + indexSetting.book_id,
+                    script: "indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();"
+                });
+            } else if (indexSetting.from == 'read') {
+                api.execScript({
+                    name: indexSetting.from,
+                    script: "indexSetting.userinfo = $api.getStorage('userinfo');"
+                });
+            } else {
+                api.execScript({
+                    name: indexSetting.from,
+                    script: "indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();"
+                });
+            }
+            back();
+        } else {
+
+			toast.fail({
+				title:ret2.error,
+				duration:2000
+			})
+        }
+    });
+}
+
+function reguser(rgtype) {
+    if (rgtype == 'mob') {
+        var username = parseInt($api.val($api.byId('regusername')));
+        var password = $api.trim($api.val($api.byId('regpassword')));
+        var yanzheng = $api.trim($api.val($api.byId('yanzhengma')));
+        if (!username || !password || !yanzheng) {
+            toast.fail({
+                title: !yanzheng?"必须填写验证码":(!username?'必须填写手机号':'必须填写密码'),
+                duration: 2000
+            });
+            return false;
+        }
+        if ((username !== username) || (username < 10000000000)) {
+            toast.fail({
+                title: "手机号格式不正确",
+                duration: 2000
+            });
+            return false;
+        }
+        //验证码是否正确
+        indexSetting.sms.verify({
+            phone: username,
+            country: "86",
+            code: yanzheng
+        }, function(ret, err) {
+            if (!ret.status) {
+				toast.fail({
+					title:err.msg,
+					duration:2000
+				})
+                return false;
+            } else {
+                regaction(username, password);
+            }
+        });
+    } else {
+        var username = $api.trim($api.val($api.byId('yhregusername')));
+        var password = $api.trim($api.val($api.byId('yhregpassword')));
+        if (!username || !password) {
+            toast.fail({
+                title: !username?"用户名不得为空":'密码不得为空',
+                duration: 2000
+            });
+            return false;
+        }
+        if(!/^\w+$/i.test(username)){
+          toast.fail({
+              title: "用户名只能包含英文字母、数字、下划线",
+              duration: 3000
+          });
+          return false;
+        }
+        regaction(username, password);
+    }
+}
+
+function regaction(username, password) {
+    //start
+    toast.loading({
+        title:"注册中",
+        duration:2000
+    })
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=reg&param=username----' + (username) + ',pass----' + (password),
+        method: 'get'
+    }, function(ret2, err2) {
+        toast.hide();
+        if (ret2.status) {
+            toast.success({
+                title: "注册成功",
+                duration: 2000
+            });
+            $api.setStorage('userinfo', ret2.data);
+            api.execScript({
+                name: 'root',
+                frameName: 'store',
+                script: "checkstatus();indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();$api.attr($api.byId('avatar'),'src','" + ret2.data.avatar + "')"
+            });
+            if (indexSetting.from == 'book') {
+                api.execScript({
+                    name: 'book_' + indexSetting.book_id,
+                    script: "indexSetting.userinfo = $api.getStorage('userinfo');api.refreshHeaderLoading();"
+                });
+            } else if (indexSetting.from == 'read') {
+                api.execScript({
+                    name: indexSetting.from,
+                    script: "indexSetting.userinfo = $api.getStorage('userinfo');"
+                });
+            } else {
+                api.execScript({
+                    name: indexSetting.from,
+                    script: "indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();"
+                });
+            }
+            back();
+        } else {
+			toast.fail({
+				title:ret2.error,
+				duration:2000
+			})
+        }
+    });
+    //end
+}
+
+function checkinstall(type) {
+    if (type == 'qq') {
+        indexSetting.qq = api.require('qq');
+        indexSetting.qq.installed(function(ret, err) {
+            if (ret.status) {
+                toast.loading({
+                    title: '正在打开QQ',
+                    duration: 2000
+                });
+                loginwithqq();
+            } else {
+                toast.fail({
+                    title: '本机没有安装QQ',
+                    duration: 2000
+                });
+            }
+        });
+    }
+}
+
+function loginwithqq() {
+    var appinfo = $api.getStorage('appinfo');
+    indexSetting.qq.login(function(ret, err) {
+        if (ret) {
+            var updateuserinfo = $api.getStorage('userinfo');
+            updateuserinfo.uid = updateuserinfo.qqopenid = ret.openId;
+            updateuserinfo.access = ret.accessToken;
+            indexSetting.qq.getUserInfo(function(ret2, err2) {
+                if (ret2) {
+                    indexSetting.avatar = updateuserinfo.avatar = ret2.info.figureurl_qq_2;
+                    updateuserinfo.gender = ret2.info.gender;
+                    updateuserinfo.qqname = updateuserinfo.name = ret2.info.nickname;
+                    appinfo.trameid = updateuserinfo.trameid = indexSetting.trameid;
+                    appinfo.trametitle = updateuserinfo.trametitle = indexSetting.trametitle;
+                    appinfo.tramefield = updateuserinfo.tramefield = indexSetting.tramefield;
+                    appinfo.dstrameid = updateuserinfo.dstrameid = indexSetting.dstrameid;
+                    appinfo.dstrametitle = updateuserinfo.dstrametitle = indexSetting.dstrametitle;
+                    appinfo.dstramefield = updateuserinfo.dstramefield = indexSetting.dstramefield;
+                    $api.setStorage('appinfo', appinfo);
+                    updateuserinfo.dqlogintype = 'qq';
+                    $api.setStorage('userinfo', updateuserinfo);
+                    // 判断是否绑定过帐号
+                    api.ajax({
+                        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=withotherlogin&param=logintype----qq,openid----' + ret.openId,
+                        method: 'get'
+                    }, function(retbind, errbind) {
+                        if (retbind && retbind.status) {
+                            updateuserinfo.dstramenums = retbind.data.dstramenums;
+                            updateuserinfo.tramenums = retbind.data.tramenums;
+                            updateuserinfo.group = retbind.data.group;
+                            updateuserinfo.bbsuid = retbind.data.bbsuid;
+                            updateuserinfo.forumname = retbind.data.forumname;
+                            updateuserinfo.dqlogintype = 'qq';
+                            updateuserinfo.name = ret2.info.nickname;
+                        } else {
+                            updateuserinfo.dstramenums = 0;
+                            updateuserinfo.tramenums = 0;
+                            updateuserinfo.group = updateuserinfo.trametitle + ':' + updateuserinfo.tramenums;
+                            updateuserinfo.bbsuid = 0;
+                        }
+                        $api.setStorage('userinfo', updateuserinfo);
+                        indexSetting.userinfo = updateuserinfo;
+                    });
+                    toast.success({
+                        title: '登录成功',
+                        duration: 2000,
+                    });
+                    setTimeout(function(){
+                    	api.execScript({
+                        name: 'root',
+                        frameName: 'store',
+                        script: "indexSetting.userinfo = $api.getStorage('userinfo');$api.attr($api.byId('avatar'),'src','" + ret2.info.figureurl_qq_2 + "')"
+                    	});
+	                    if (indexSetting.from == 'book') {
+	                        api.execScript({
+	                            name: 'book_' + indexSetting.book_id,
+	                            script: "indexSetting.userinfo=$api.getStorage('userinfo');"
+	                        });
+	                    } else if (indexSetting.from == 'read') {
+	                        api.execScript({
+	                            name: indexSetting.from,
+	                            script: "indexSetting.userinfo=$api.getStorage('userinfo');"
+	                        });
+	                    } else {
+	                        api.execScript({
+	                            name: indexSetting.from,
+	                            script: "indexSetting.userinfo=$api.getStorage('userinfo');"
+	                        });
+	                    }
+	                    back();
+                    },500)
+
+                } else {
+                    toast.fail({
+                        title: err2.msg,
+                        duration: 2000
+                    });
+                }
+            });
+        } else {
+            toast.fail({
+                title: '登录失败请重试',
+                duration: 2000,
+            });
+        }
+    });
+}
+</script>
+</body>
+</html>

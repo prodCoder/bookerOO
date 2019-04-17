@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #newversion {
+        width: 80%;
+        margin: 1rem auto;
+    }
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav transparent" id="header">
+        <a class="aui-pull-left aui-btn" onclick="back()">
+            <i class="aui-iconfont aui-icon-left"></i>
+        </a>
+        <div class="aui-title" id="title">检测新版本</div>
+    </header>
+    <div id="main" class="aui-content-padded">
+        <div class="aui-text-center aui-margin-t-15 aui-font-size-20 aui-text-default">
+            当前版本:<span class="aui-tex-primary" id="version"></span>
+        </div>
+        <div class="aui-btn aui-btn-danger aui-btn-block aui-hide aui-btn-sm" id="newversion" onclick="update()"></div>
+        <div id="loading" class="aui-text-center aui-font-size-16 aui-margin-t-15" style="margin-top: 4rem;"><span class=" fa fa-spinner fa-spin fa-3x"></span></div>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+var indexSetting = $api.getStorage('appinfo');
+apiready = function() {
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    autocheckyejian();
+    indexSetting.oldversion = api.appVersion;
+    $api.text($api.byId('version'), indexSetting.oldversion);
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    initload();
+};
+
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=updateversion&param=version----' + indexSetting.oldversion,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret.status) {
+            $api.addCls($api.byId('loading'), 'aui-hide');
+            $api.text($api.byId('newversion'), '有新版本' + ret.version);
+            $api.removeCls($api.byId('newversion'), 'aui-hide');
+            indexSetting.newurl = ret.newurl;
+        } else {
+            $api.text($api.byId('loading'), '已是最新版本');
+        }
+
+    });
+}
+
+function update() {
+    if (api.systemType == 'android') {
+        api.openApp({
+            androidPkg: 'android.intent.action.VIEW',
+            mimeType: 'text/html',
+            uri: indexSetting.newurl
+        }, function(ret, err) {});
+    }
+}
+</script>
+</html>

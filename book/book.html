@@ -1,0 +1,887 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #main .fengmian .aui-info,
+    #main .fengmian .aui-info .aui-info-item {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        height: auto;
+        min-height: auto;
+    }
+    #main .fengmian .aui-info {
+        margin-top: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+    #main .aui-info.book_name {
+        width: 95%;
+    }
+    #main .book_title {
+        font-size: 1rem;
+        font-weight: 700;
+        width: 95%;
+        overflow: hidden;
+        white-space: normal;
+    }
+    #book_desco {
+        position: relative;
+        margin-top: 0;
+        padding: 0.5rem;
+    }
+    #book_desco .rightdown {
+        position: absolute;
+        right: 5px;
+        bottom: 2px;
+        z-index: 999;
+    }
+    .book_desco {
+        font-size: 0.6rem;color: #8f8f8f;max-height: 67px;padding-bottom: 8px;overflow: hidden;text-overflow: ellipsis;word-break: break-all;display: -webkit-box;-webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    }
+    .aui-col-xs-4 img {
+        display: block;
+        margin: 0.2rem auto auto;
+    }
+    .relative {
+        position: relative;
+    }
+    #main .starwarp {
+        width: 80px;
+        height: 15px;
+        display: block;
+        overflow: hidden;
+        position: absolute;
+        left: 0;
+    }
+    #main .starred,
+    #main .starban {
+        position: absolute;
+        left: 0;
+    }
+    .starban {
+        width: 100%;
+        background: url("../image/icon/starban.png") no-repeat 0 0;
+        z-index: 3;
+    }
+    .starred {
+        width: 0;
+        z-index: 4;
+        background: url("../image/icon/starred.png") no-repeat 0 0 transparent;
+    }
+    #postbutton .aui-btn{width: 60%;margin:8px auto;}
+</style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title">书籍详情</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="openSharebox()">
+            <span class="aui-iconfont aui-icon-share"></span>
+        </a>
+    </header>
+    <div id="main">
+        <div class="aui-row fengmian aui-background-white aui-padded-b-10 aui-margin-t-10">
+            <div class="aui-col-xs-4 aui-text-center">
+              <img src="../image/book.png" style="width:90%" alt="">
+            </div>
+            <div class="aui-col-xs-8">
+                <div class="aui-info">
+                    <div class="aui-info-item book_title"></div>
+                </div>
+                <div class="aui-info">
+                    <div class="aui-info-item aui-font-size-12">10分(100人评)</div>
+                </div>
+                <div class="aui-info">
+                    <div class="aui-info-item  aui-font-size-12">
+                        <span class="aui-text-primary"></span>
+                        <span class="aui-text-primary"> | </span>
+                        <span class="aui-text-primary"></span>
+                    </div>
+                </div>
+                <div class="aui-info">
+                    <div class="aui-info-item  aui-font-size-12">共100章</div>
+                </div>
+                <div class="aui-info">
+                    <div class="aui-info-item">
+                        <div class="aui-list-item-title aui-text-warning  aui-font-size-12"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/x-dot-template" id="main-temp">
+        <div class="aui-row fengmian aui-background-white aui-padded-b-0 aui-margin-t-10 aui-margin-b-0">
+            <div class="aui-col-xs-4 aui-text-center">
+                <img src="{{? it.image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.image}}{{??}}../image/book.png{{?}}" style="width:90%;margin:0.3rem auto;" alt="">
+            </div>
+            <div class="aui-col-xs-8">
+                <div class="aui-info book_name">
+                    <div class="aui-info-item book_title">{{=it.book_name}}</div>
+                </div>
+                <div class="aui-info relative">
+                    <div class="starwarp">
+                        <div class="starban">&nbsp;</div>
+                        <div class="starred" style="width:{{=(it.scores * 10) || ''}}%">&nbsp;</div>
+                    </div>
+                    <div class="aui-info-item aui-font-size-12" style="padding-left:85px">{{=it.scores}}分({{=it.dpcount}}人评)</div>
+                </div>
+                <div class="aui-info">
+                    <div class="aui-info-item  aui-font-size-12">
+                        <span class="aui-text-default" tapmode onclick="openauthor({{=it.uid}},'{{=it.author}}')">{{=it.author}}</span>
+                        <span class="aui-text-default">&nbsp;|&nbsp;</span>
+                        <span class="aui-text-default" onclick="opencategory({{=it.category_id}},'{{=it.category_name}}')">{{=it.category_name}}</span>
+                    </div>
+                </div>
+                <div class="aui-info">
+                    <div class="aui-info-item  aui-font-size-12">共{{=it.colums}}章</div>
+                </div>
+            </div>
+        </div>
+        <p class="aui-font-size-12 aui-text-gray book_desco aui-margin-t-0 aui-background-white aui-padded-b-10" id="book_desco" onclick="showAll()">
+            {{=it.desco || '这本书还没有添加简介哦！'}}
+            <i class="fa fa-sort-down rightdown fa-lg" id="book_desco_arrow"></i>
+        </p>
+        <ul class="aui-list aui-list-noborder aui-margin-t-5 aui-background-white">
+            <li class="aui-list-item aui-list-item-middle" onclick="openmulu({{=it.book_id}},'{{=it.book_name}}',{{=it.uid}})">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title">查看目录</div>
+                    <div class="aui-list-item-right">
+                        共{{=it.colums}}章
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <ul class="aui-list aui-list-noborder aui-margin-t-5 aui-background-white">
+            <li class="aui-list-item aui-list-item-middle">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title">书评区</div>
+                    <div class="aui-list-item-right">
+                        共{{=it.pinglunnums}}条评论
+                    </div>
+                </div>
+            </li>
+        </ul>
+        {{ for(var i=0,len=it.pinglun.length;i<len;i++) { }}
+          <div class="aui-card-list aui-margin-b-0 aui-background-white aui-hr-after">
+            <div class="aui-card-list-header aui-card-list-user">
+                <div class="aui-card-list-user-avatar">
+                    <img src="{{=it.pinglun[i].avatar}}" class="aui-img-round" />
+                </div>
+                <div class="aui-card-list-user-name">
+                    <div>{{=it.pinglun[i].author}}</div>
+                </div>
+                <div class="aui-card-list-user-info"></div>
+            </div>
+            <div class="aui-card-list-content-padded">{{=it.pinglun[i].text}}</div>
+            <div class="aui-card-list-footer">
+                <div><i {{? indexSetting.dianping.indexOf(it.pinglun[i].dp_id)===-1}} onclick="dianping({{=it.pinglun[i].dp_id}},'zhichi')" {{?}} class="fa fa-thumbs-o-up" id="dpid_{{=it.pinglun[i].dp_id}}_zhichi">{{=it.pinglun[i].zhichi}}</i> </div>
+                <div>
+                    <i {{? indexSetting.dianping.indexOf(it.pinglun[i].dp_id)===- 1}} onclick="dianping({{=it.pinglun[i].dp_id}},'fandui')" {{?}} class="fa fa-thumbs-o-down" id="dpid_{{=it.pinglun[i].dp_id}}_fandui">{{=it.pinglun[i].fandui}}</i>
+                </div>
+                <div><i class="fa "></i> {{=it.pinglun[i].time}}</div>
+            </div>
+            </div>
+        {{ } }}
+        <div id="postbutton" class="aui-background-white aui-margin-t-0 aui-padded-t-10 aui-padded-b-10">
+          <div class="aui-btn aui-btn-danger aui-btn-block aui-btn-sm " onclick="openshuping({{=it.book_id}})">发书评</div>
+        </div>
+            <ul class="aui-list aui-media-list aui-margin-t-5 aui-list-noborder aui-background-white" onclick="openauthor({{=it.uid}},'{{=it.author}}')">
+                <li class="aui-list-item">
+                    <div class="aui-media-list-item-inner">
+                        <div class="aui-list-item-inner ">作家主页</div>
+                    </div>
+                </li>
+                <li class="aui-list-item aui-list-item-middle">
+                    <div class="aui-media-list-item-inner aui-list-item-arrow">
+                        <div class="aui-list-item-media" style="width: 3rem;">
+                            <img src="{{=it.avatar}}" class="aui-img-round aui-list-img-sm">
+                        </div>
+                        <div class="aui-list-item-inner ">
+                            <div class="aui-list-item-text">
+                                <div class="aui-list-item-title aui-font-size-14">{{=it.author}}</div>
+                                <div class="aui-list-item-right"></div>
+                            </div>
+                            <div class="aui-list-item-text">共创作图书{{=it.authorbooknums}}部</div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            {{? it.authorinfo}}
+            <div class="aui-row aui-background-white aui-padded-t-5 aui-padded-b-15">
+                {{ for(var j=0,jlen=it.authorinfo.length;j<jlen;j++) { }}
+                <div class="aui-col-xs-4">
+                    <div class="aui-text-center" onclick="openbook({{=it.authorinfo[j].book_id}})">
+                        <img src="{{? it.authorinfo[j].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.authorinfo[j].image}}{{??}}../image/book.png{{?}}" style="width:80%;" alt="">
+                        <span class="aui-text-default aui-ellipsis-1 ">{{=it.authorinfo[j].book_name}}</span>
+                    </div>
+                </div>
+                {{ } }}
+            </div>
+            {{?}}
+            {{? it.other}}
+            <ul class="aui-list aui-media-list aui-margin-t-5 aui-background-white">
+              <li class="aui-list-item">
+                  <div class="aui-media-list-item-inner">
+                      <div class="aui-list-item-inner ">书友还读过</div>
+                  </div>
+              </li>
+            </ul>
+            <div class="aui-row aui-background-white aui-padded-t-5 aui-padded-b-15" id="huanyihuan" style="margin-bottom:60px;">
+                {{ for(var m=0,mlen=it.other.length;m<mlen;m++) { }}
+                <div class="aui-col-xs-4">
+                    <div class="aui-text-center" onclick="openbook({{=it.other[m].book_id}})">
+                        <img src="{{? it.other[m].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.other[m].image}}{{??}}../image/book.png{{?}}" style="width:80%;" alt="">
+                        <span class="aui-text-default aui-ellipsis-1">{{=it.other[m].book_name}}</span>
+                    </div>
+                </div>
+                {{ } }}
+            </div>
+            {{?}}
+            <footer class="aui-bar aui-bar-tab whiteback" id="footer">
+                <div class="aui-bar-tab-item" tapmode onclick="openroot()">
+                    <i class="fa fa-home"></i>
+                    <div class="aui-bar-tab-label">精选</div>
+                </div>
+                <div class="aui-bar-tab-item" tapmode onclick="addstore({{=it.book_id}},0)">
+                    <i class="aui-iconfont1 1aui-icon-my fa fa-sign-in"></i>
+                    <div class="aui-bar-tab-label" id="addstore">放入书架</div>
+                </div>
+                <div class="aui-bar-tab-item aui-active" tapmode onclick="read({{=it.book_id}},0)">
+                    <i class="fa-book fa"></i>
+                    <div class="aui-bar-tab-label" id="readbutton">阅读</div>
+                </div>
+                <div class="aui-bar-tab-item" tapmode onclick="langdu({{=indexSetting.book_id}},{{=indexSetting.firstcolumid}},'click')">
+                    <i class="fa fa-play-circle" id="bofangicon" data-play="init"></i>
+                    <div class="aui-bar-tab-label" id="langdu">听书</div>
+                </div>
+            </footer>
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/aui-sharebox.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+var downintval = 0;
+var thebook = {};
+if ($api.getStorage('localstore')) {
+    indexSetting.localstore = $api.getStorage('localstore');
+} else {
+    indexSetting.localstore = {
+        data: []
+    };
+}
+if ($api.getStorage('dianping')) {
+    indexSetting.dianping = $api.getStorage('dianping');
+} else {
+    indexSetting.dianping = [0];
+}
+if ($api.getStorage('zhichi')) {
+    indexSetting.zhichi = $api.getStorage('zhichi');
+} else {
+    indexSetting.zhichi = [0];
+}
+if ($api.getStorage('fandui')) {
+    indexSetting.fandui = $api.getStorage('fandui');
+} else {
+    indexSetting.fandui = [0];
+}
+apiready = function() {
+    autocheckyejian();
+    ajaxuser();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    indexSetting.audio = api.require('audio');
+    indexSetting.speechRecognizer = api.require('speechRecognizer');
+    indexSetting.book_id = api.pageParam.book_id ? api.pageParam.book_id : 0;
+    indexSetting.fs = api.require('fs');
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    initload();
+    if (isinstore(indexSetting.book_id)) {
+        $api.text($api.byId('addstore'), '已放入书架');
+    }
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+var sharebox = new auiSharebox();
+function openSharebox() {
+    sharebox.init({
+        frameBounces: true, //当前页面是否弹动，（主要针对安卓端）
+        buttons: [{
+            image: '../image/icon/qq.png',
+            text: 'QQ好友',
+            value: 'qq'
+        }, {
+            image: '../image/icon/qzone.png',
+            text: 'QQ空间',
+            value: 'qq-qzone'
+        }, {
+            image: '../image/icon/wechat.png',
+            text: '微信',
+            value: 'wx' 
+        }, {
+            image: '../image/icon/quan.png',
+            text: '朋友圈',
+            value: 'wx-circle'
+        }],
+        col: 4,
+        cancelTitle: '关闭'
+    }, function(ret) {
+        if (ret) {
+            if (ret.buttonValue == 'qq' || ret.buttonValue == 'qq-qzone') {
+                var qq = api.require('qq');
+                qq.shareNews({
+                    url: indexSetting.url + '../plugin.php?id=jameson_read&contrl=touch&act=book&book_id=' + indexSetting.book_id + '&laiyuan=app',
+                    title: thebook.book_name,
+                    description: thebook.desco ? thebook.desco : ' ',
+                    type: ((ret.buttonValue == 'qq-qzone') ? 'QZone' : 'QFriend'),
+                    imgUrl: indexSetting.url + '../' + (thebook.image ? ('data/attachment/forum/' + thebook.image) : 'source/plugin/jameson_read/images/book.jpg')
+                }, function(retqq, errqq) {
+                    if (retqq.status) {
+                        toast.success({
+                            title: '分享成功',
+                            duration: 2000
+                        });
+                    } else if (errqq.code != -4) {
+                        toast.fail({
+                            title: '系统异常或未安装qq',
+                            duration: 2000
+                        });
+                    }
+                });
+            } else if (ret.buttonValue == 'wx' || ret.buttonValue == 'wx-circle') {
+                var wx = api.require('wx');
+                wx.shareWebpage({
+                    scene: (ret.buttonValue == 'wx' ? 'timeline' : 'session'),
+                    title: thebook.book_name,
+                    description: thebook.desco ? thebook.desco : '来自app的好书！',
+                    thumb: 'widget://image/book.png',
+                    contentUrl: indexSetting.url + '../plugin.php?id=jameson_read&contrl=touch&act=book&book_id=' + indexSetting.book_id + '&laiyuan=app'
+                }, function(retwx, errwx) {
+                    if (retwx.status) {
+                        toast.success({
+                            title: '分享成功',
+                            duration: 2000
+                        });
+                    } else {
+                        if (errwx.code != 2) {
+                            toast.fail({
+                                title: '授权被拒绝或未安装微信',
+                                duration: 2000
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    })
+}
+
+function isinstore(book_id) {
+    if (indexSetting.localstore && $api.isArray(indexSetting.localstore.data)) {
+        for (var i = 0, len = indexSetting.localstore.data.length; i < len; i++) {
+            if (indexSetting.localstore.data[i].book_id == book_id) {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        return false;
+    }
+}
+//  初始化
+function initload() {
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=book&param=book_id----' + indexSetting.book_id + ',bbsuid----' + indexSetting.userinfo.bbsuid,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                indexSetting.colums = ret.colums;
+                indexSetting.firstcolumid = indexSetting.shoundcid = ret.firstcolumid;
+                indexSetting.shoundprogress = 0;
+                indexSetting.firstsubject = indexSetting.shoundsubject = ret.firstsubject;
+                indexSetting.zhangjie = indexSetting.shoundzhangjie = ret.firstzhangjie;
+                indexSetting.firstkedu = ret.firstkedu;
+                indexSetting.firstprice = indexSetting.shoundprice = ret.firstprice;
+
+                var newhistory = {};
+                newhistory.image = ret.image;
+                newhistory.book_name = ret.book_name;
+                $api.text($api.byId('title'), ret.book_name);
+                newhistory.book_id = ret.book_id;
+                newhistory.colums = ret.colums;
+                newhistory.zhangjie = ret.firstzhangjie;
+                newhistory.colum_id = ret.firstcolumid;
+                newhistory.subject = ret.firstsubject;
+                newhistory.progress = 0;
+                thebook.book_id = ret.book_id;
+                thebook.authorid = ret.uid;
+                thebook.colums = ret.colums;
+                thebook.book_name = ret.book_name;
+                thebook.image = ret.image;
+                thebook.desco = ret.desco;
+                thebook.author = ret.author;
+                thebook.category_name = ret.category_name;
+                thebook.scores = ret.scores;
+                thebook.avatar = ret.avatar;
+                thebook.authorbooknums = ret.authorbooknums;
+                thebook.fensinums = ret.fensinums;
+                thebook.dashangnums = ret.dashangnums;
+                thebook.authorinfo = $api.jsonToStr(ret.authorinfo);
+                var temp = $api.text($api.byId("main-temp"));
+                var dottemp = doT.template(temp);
+                var html = dottemp(ret);
+                $api.html($api.byId('main'), html);
+                toast.hide()
+                setTimeout(function() {
+                    for (var k = 0, klen = ret.pinglun.length; k < klen; k++) {
+                        if (indexSetting.dianping.indexOf(parseInt(ret.pinglun[k].dp_id)) != -1) {
+                            if (indexSetting.zhichi.indexOf(parseInt(ret.pinglun[k].dp_id)) != -1) {
+                                $api.addCls($api.byId('dpid_' + ret.pinglun[k].dp_id + '_zhichi'), 'aui-text-danger');
+                            } else if (indexSetting.fandui.indexOf(parseInt(ret.pinglun[k].dp_id)) != -1) {
+                                $api.addCls($api.byId('dpid_' + ret.pinglun[k].dp_id + '_fandui'), 'aui-text-danger');
+                            }
+                        }
+                    }
+                }, 300);
+                if (isinstore(indexSetting.book_id)) {
+                    $api.text($api.byId('addstore'), '已加入书架');
+                }
+            } else {
+                toast.fail({
+                    title: ret.error,
+                    duration: 2000
+                });
+            }
+
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+
+function showAll() {
+    $api.toggleCls($api.byId('book_desco'), 'book_desco');
+    $api.toggleCls($api.byId('book_desco_arrow'), 'fa-flip-vertical');
+}
+//打开分类
+function opencategory(category_id, category_name) {
+    openwin('category', {
+            category_id: category_id,
+            category_name: category_name
+        })
+}
+//打开书评
+function openshuping(book_id) {
+    openwin('shuping', {
+            book_id: indexSetting.book_id,
+            book_name: thebook.book_name
+        })
+}
+
+//打开目录
+function openmulu(book_id, book_name, authorid) {
+    if (parseInt(indexSetting.colums) < 1) {
+        toast.fail({
+            title: '暂无章节',
+            duration: 2000
+        });
+        return;
+    }
+    openwin('mulu', {
+            book_id: book_id,
+            book_name: book_name,
+            authorid: authorid
+        })
+}
+
+//加入书架
+function addstore(book_id, uid) {
+    // 待同步服务器
+    if (!isinstore(book_id)) {
+        indexSetting.localstore = $api.getStorage('localstore');
+        if (indexSetting.localstore && indexSetting.localstore.data) {
+            indexSetting.localstore.data.push(thebook)
+            $api.setStorage('localstore', indexSetting.localstore);
+        } else {
+            indexSetting.localstore = {
+                data: [thebook]
+            }
+            $api.setStorage('localstore', indexSetting.localstore);
+        }
+        var userinfo = $api.getStorage('userinfo');
+        if (userinfo.bbsuid > 0 && userinfo.bbsuid > 0) {
+            api.ajax({
+                url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=addstore&param=book_id----' + indexSetting.book_id + ',bbsuid----' + userinfo.bbsuid,
+                method: 'get'
+            }, function(ret, err) {
+                if (ret) {}
+            });
+        }
+        $api.text($api.byId('addstore'), '已加入书架');
+        api.execScript({
+            name: 'root',
+            frameName: 'store',
+            script: 'api.refreshHeaderLoading()'
+        });
+    } else {
+        $api.text($api.byId('addstore'), '已加入书架');
+    }
+}
+//下载
+function down(book_id, uid,colum_id) {
+    if (indexSetting.colums < 1) {
+        toast.fail({
+            title: '暂无章节',
+            duration: 2000
+        });
+        return;
+    }
+    var filepath = 'fs://' + book_id + '_' + colum_id + '.txt';
+    api.ajax({
+	    url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=bookstr&param=book_id----' + book_id + ',colum_id----' + colum_id,
+	    method: 'get',
+	    dataType:"text",
+	    timeout:60
+	}, function(ret, err) {
+	    if (ret) {
+	        indexSetting.fs.createFile({
+			    path: filepath
+			}, function(ret0, err0) {
+			    if (ret0.status) {
+//			        打开
+					indexSetting.fs.open({
+					    path: filepath,
+					    flags: 'read_write'
+					}, function(retd, errd) {
+					    if (retd.status) {
+					        indexSetting.fs.write({
+							    fd: retd.fd,
+							    data:ret
+							}, function(ret2, err2) {
+							    if (ret2.status) {
+							    	checkdownload(book_id);
+							    } else {
+							    	toast.fail({
+						                title: '下载失败3',
+						                duration: 2000
+						            });
+							    }
+							});
+					    } else {
+					    	toast.fail({
+						        title:'下载失败,'+errd.msg,
+						        duration:2000
+						    })
+					    }
+					});
+			    } else {
+			    	toast.fail({
+				        title:'下载失败,'+err0.msg,
+				        duration:2000
+				    })
+			    }
+			});
+	    } else {
+	    	toast.fail({
+                title: '下载失败3',
+                duration: 2000
+            });
+	    }
+	});
+}
+//阅读
+
+
+function read(book_id, uid) {
+    if (parseInt(indexSetting.colums) < 1) {
+        toast.fail({
+            title: '暂无章节',
+            duration: 2000
+        });
+        return;
+    }
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    if (indexSetting.userinfo.bbsuid < 1 || indexSetting.userinfo.uid <1) {
+        // 未登录或未绑定论坛帐号,提醒登录或绑定
+        tixinglogin();
+        return false;
+    }
+    $api.text($api.byId('readbutton'), '打开中');
+    indexSetting.fs.exist({
+        path: 'fs://' + book_id + '_' + indexSetting.firstcolumid + '.txt'
+    }, function(ret, err) {
+    	if(ret.exist) {
+          checkdownload(book_id);
+        }else if(!ret.exist){
+        	downintval = 1;
+        	down(book_id, uid,indexSetting.firstcolumid);
+        }
+    });
+
+}
+
+function checkdownload(book_id) {
+	indexSetting.fs.exist({
+        path: 'fs://' + book_id + '_' + indexSetting.firstcolumid + '.txt'
+    }, function(ret, err) {
+    	if(ret.exist) {
+        $api.text($api.byId('readbutton'), '阅读');
+        openwin('read', {
+                book_id: book_id,
+                book_name: thebook.book_name,
+                image: thebook.image,
+                desco: thebook.desco,
+                colum_id: indexSetting.shoundcid,
+                zhangjie: indexSetting.shoundzhangjie,
+                subject: indexSetting.shoundsubject,
+                price: indexSetting.shoundprice,
+                authorid: thebook.authorid,
+                progress: indexSetting.shoundprogress
+       })
+        }else if(!ret.exist){
+        	downintval = 1;
+        	down(book_id, uid,indexSetting.firstcolumid);
+        }
+    });
+
+}
+//朗读
+function langdu(book_id, colum_id, eventtype) {
+  indexSetting.userinfo = $api.getStorage('userinfo');
+  if (indexSetting.userinfo.bbsuid < 1 || indexSetting.userinfo.uid <1) {
+      // 未登录或未绑定论坛帐号,提醒登录或绑定
+      tixinglogin();
+      return false;
+  }
+    if (eventtype == 'click') {
+        var dqzhuangtai = $api.attr($api.byId('bofangicon'), 'data-play');
+        if (dqzhuangtai == 'init') {
+            if (!indexSetting.firstcolumid) {
+                nozhangjie();
+                return;
+            }
+            //当前是初始化状态，点击播放,
+            $api.attr($api.byId('bofangicon'), 'data-play', 'playing');
+            $api.addCls($api.byId('bofangicon'), 'fa-spin');
+            toast.success({
+                title: '即将朗读，可回到到桌面，但不可退出本页',
+                duration: 3000
+            });
+        } else if (dqzhuangtai == 'playing') {
+            //进行暂停操作
+            $api.attr($api.byId('bofangicon'), 'data-play', 'zanting');
+            $api.removeCls($api.byId('bofangicon'), 'fa-spin');
+            indexSetting.speechRecognizer.pauseRead();
+            return false;
+        } else if (dqzhuangtai == 'zanting') {
+            //恢复播放
+            $api.attr($api.byId('bofangicon'), 'data-play', 'playing');
+            $api.addCls($api.byId('bofangicon'), 'fa-spin');
+            indexSetting.speechRecognizer.resumeRead();
+            return false;
+        }
+    }
+    indexSetting.startaudio = 0;
+    var size = 0;
+    indexSetting.strarray = new Array();
+    if (colum_id) {
+        api.download({
+            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=downbook&param=book_id----' + book_id + ',colum_id----' + colum_id,
+            savePath: 'fs://' + book_id + '_' + colum_id + '.txt',
+            report: true,
+            cache: true,
+            allowResume: true
+        }, function(ret, err) {
+            if (ret.state == 1) {
+                indexSetting.fssy = api.require('fs');
+                var retsy = indexSetting.fssy.openSync({
+                    path: 'fs://' + book_id + '_' + colum_id + '.txt',
+                    flags: 'read_write'
+                });
+                if (!retsy.status) {
+                    opentxtshibai();
+                    return;
+                }
+                var retsyAttr = indexSetting.fssy.getAttributeSync({
+                    path: 'fs://' + book_id + '_' + colum_id + '.txt'
+                });
+                size = retsyAttr.attribute.size;
+                if (size > 1) {
+                    indexSetting.fenduan = Math.ceil(size / 1000);
+                    var tmp = indexSetting.fssy.readSync({
+                        fd: retsy.fd,
+                        offset: (indexSetting.startaudio * 1000),
+                        length: 1000,
+                        codingType: 'utf8'
+                    });
+                    if (tmp.data) {
+                        indexSetting.startaudio++;
+                        readstrinaudio(tmp.data, book_id, colum_id);
+                    } else {
+                        //下一个章节
+                        api.ajax({
+                            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=nextcolum&param=book_id----' + book_id + ',colum_id----' + colum_id + ',zhangjie----' + indexSetting.zhangjie,
+                            method: 'get'
+                        }, function(retnext, errnext) {
+                            if (parseInt(retnext.data.colum_id) < 1) {
+                                toast.fail({
+                                    title: '没有了',
+                                    duration: 2000
+                                });
+                                indexSetting.speechRecognizer.pauseRead();
+                            } else {
+                                indexSetting.zhangjie = retnext.data.zhangjie;
+                                langdu(book_id, retnext.data.colum_id, 0);
+                                return;
+                            }
+                        });
+                    }
+                } else {
+                    nozhangjie();
+                }
+            } else if (ret.state == 2) {
+                nozhangjie();
+            }
+        });
+    } else {
+        nozhangjie();
+    }
+}
+
+function readstrinaudio(str, book_id, colum_id) {
+    indexSetting.speechRecognizer.read({
+        readStr: str,
+        speed: 80,
+        volume: 100,
+        voice: 'vixq',
+        rate: 16000
+    }, function(ret, err) {
+        if (ret.status) {
+            if (ret.speakProgress == 100) {
+                var tmp = indexSetting.fssy.readSync({
+                    offset: (indexSetting.startaudio * 1000),
+                    length: 1000,
+                    codingType: 'utf8'
+                });
+                if (tmp.data) {
+                    indexSetting.startaudio++;
+                    readstrinaudio(tmp.data);
+                } else {
+                    api.ajax({
+                        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=nextcolum&param=book_id----' + book_id + ',colum_id----' + colum_id + ',zhangjie----' + indexSetting.zhangjie,
+                        method: 'get'
+                    }, function(retnext, errnext) {
+                        if (parseInt(retnext.data.colum_id) < 1) {
+                            toast.fail({
+                                title: '没有了',
+                                duration: 2000
+                            });
+                            indexSetting.speechRecognizer.stopRead();
+                        } else {
+                            indexSetting.zhangjie = retnext.data.zhangjie;
+                            langdu(book_id, retnext.data.colum_id, 0);
+                        }
+                    });
+                }
+            }
+        }
+    });
+}
+
+function tixinglogin() {
+    // 未在登录且绑定状态则进行提醒
+    var dialog = new auiDialog({})
+    dialog.alert({
+        title: '请登录',
+        msg: '请登录后阅读！',
+        buttons: ['取消', '去登录']
+    }, function(ret) {
+        if (ret) {
+            if (ret.buttonIndex == 2) {
+                openwin('login', {
+                        from: "book",
+                        book_id: indexSetting.book_id
+                })
+            }
+        }
+    })
+}
+function nozhangjie() {
+    toast.fail({
+        title: '暂无章节',
+        duration: 2000
+    });
+}
+
+function opentxtshibai() {
+    toast.fail({
+        msg: '播放失败',
+        duration: 2000,
+        location: 'top'
+    });
+}
+function openroot(){
+  api.openWin({
+      name: 'root',
+      url: '../index.html',
+      rect: {
+          x: 0,
+          y: 0,
+          w: api.winWidth,
+          h: api.winHeight
+      },
+      useWKWebView:true,
+      historyGestureEnabled:true,
+      pageParam:{},
+      bgColor: "#ffffff",
+      reload: true,
+      bounces: false,
+      vScrollBarEnabled: true,
+      hScrollBarEnabled: false,
+      animation: {
+          type: "none",
+          subType: "from_right",
+          duration: 300
+      }
+  });
+}
+</script>
+</html>

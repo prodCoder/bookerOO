@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title"></div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main">
+        <div style="height:220px;">&nbsp;</div>
+        <div class="aui-info aui-padded-l-10 aui-padded-r-10">
+            <div class="aui-info-item">
+                <span class="aui-btn aui-btn-danger" id="guanzhubutton" onclick="guanzhu()" tapmode>关注他</span>
+            </div>
+            <div class="aui-info-item">全部作品[<i class="aui-text-danger" id="allnums"></i>]</div>
+        </div>
+        <ul class="aui-list aui-media-list aui-list-noborder" id="maint"></ul>
+        <div id="loading" class="aui-hide aui-text-center"><span class="fa-2x fa fa-spinner fa-spin"></span></div>
+    </div>
+    <script type="text/x-dot-template" id="maint-temp">
+      {{? it.databook}}
+        {{ for(var i=0,len=it.databook.length;i<len;i++) { }}
+          <li class="aui-list-item aui-margin-b-5" tapmode onclick="openbook({{=it.databook[i].book_id}})">
+            <div class="aui-media-list-item-inner">
+                <div class="aui-list-item-media">
+                    <img src="{{? it.databook[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.databook[i].image}}{{??}}../image/book.png{{?}}">
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">{{=it.databook[i].book_name}}</div>
+                        <div class="aui-list-item-right aui-text-warning"></div>
+                    </div>
+                    <div class="aui-list-item-text aui-ellipsis-2">{{=it.databook[i].desco || ''}}</div>
+                    <div class="aui-info aui-margin-t-10" style="padding:0">
+                        <div class="aui-info-item">
+                            <img src="{{=it.databook[i].avatar}}" style="width:0.6rem" class="aui-img-round" /><span class="aui-margin-l-5">{{=it.databook[i].author}}</span>
+                        </div>
+                        <div class="aui-info-item">
+                            <span class="aui-label  aui-label-outlined aui-label-primary">{{=it.databook[i].category_name}}
+                          </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </li>
+        {{ } }}
+      {{??}}
+        <li class="aui-list-header">该作者还未发布图书</li>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.guanzhuinfo = $api.getStorage('guanzhuinfo') ? $api.getStorage('guanzhuinfo') : (['0']);
+indexSetting.current = 1;
+indexSetting.total = 2;
+indexSetting.loading = false;
+apiready = function() {
+    autocheckyejian();
+    api.parseTapmode();
+    $api.fixStatusBar($api.dom('header'));
+    indexSetting.author = api.pageParam.author;
+    indexSetting.authorid = parseInt(api.pageParam.authorid);
+    $api.text($api.byId('title'), indexSetting.author);
+    api.addEventListener({
+        name: 'scrolltobottom',
+        extra: {
+            threshold: 20
+        }
+    }, function(ret, err) {
+        if (!indexSetting.loading) {
+            indexSetting.loading = true;
+            loadbooklist();
+            indexSetting.loading = false;
+        }
+    });
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    initload();
+    loadbooklist();
+    checkguanzhu();
+};
+
+function guanzhu() {
+    var index = indexSetting.guanzhuinfo.indexOf(indexSetting.authorid);
+    if (index !== -1) {
+        indexSetting.guanzhuinfo.splice(index, 1);
+        changefensi(0);
+    } else {
+        indexSetting.guanzhuinfo.push(indexSetting.authorid);
+        changefensi(1);
+    }
+    $api.setStorage('guanzhuinfo', indexSetting.guanzhuinfo);
+    checkguanzhu();
+}
+//增加服务器数据库粉丝数量
+function changefensi(type) {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=changefensi&param=uid----' + indexSetting.authorid + ',bbsuid----' + indexSetting.userinfo.bbsuid + ',type----' + type,
+        method: 'get'
+    }, function(ret, err) {});
+}
+
+function checkguanzhu() {
+    if (inArray(indexSetting.authorid, indexSetting.guanzhuinfo)) {
+        $api.removeCls($api.byId('guanzhubutton'), 'aui-btn-danger');
+        $api.addCls($api.byId('guanzhubutton'), 'aui-btn-info');
+        $api.html($api.byId('guanzhubutton'), '已关注');
+    } else {
+        $api.addCls($api.byId('guanzhubutton'), 'aui-btn-danger');
+        $api.removeCls($api.byId('guanzhubutton'), 'aui-btn-info');
+        $api.html($api.byId('guanzhubutton'), '关注他');
+    }
+}
+
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=author&param=uid----' + indexSetting.authorid,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            showauthor(ret.authorinfo);
+            $api.text($api.byId('allnums'), ret.authorinfo.allnums);
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+        toast.hide();
+    });
+}
+
+function showauthor(info) {
+    var personalCenter = api.require('personalCenter');
+    var btnArray = [{
+        'bgImg': 'widget://image/icon/trans.png',
+        'selectedImg': 'widget://image/icon/trans2.png',
+        'lightImg': 'widget://image/icon/trans2.png',
+        'title': indexSetting.dstrametitle,
+        'count': parseInt(info.dashang),
+        "titleColor": "#ffffff",
+        "titleLightColor": "#ffffff",
+        "countColor": "#ffffff",
+        "countLightColor": "#ffffff"
+    }, {
+        'bgImg': 'widget://image/icon/trans.png',
+        'selectedImg': 'widget://image/icon/trans2.png',
+        'lightImg': 'widget://image/icon/trans2.png',
+        'title': '最新创作',
+        'count': info.newnums,
+        "titleColor": "#ffffff",
+        "titleLightColor": "#ffffff",
+        "countColor": "#ffffff",
+        "countLightColor": "#ffffff"
+    }, {
+        'bgImg': 'widget://image/icon/trans.png',
+        'selectedImg': 'widget://image/icon/trans2.png',
+        'lightImg': 'widget://image/icon/trans2.png',
+        'title': '作品粉丝',
+        'count': info.fensi,
+        "titleColor": "#ffffff",
+        "titleLightColor": "#ffffff",
+        "countColor": "#ffffff",
+        "countLightColor": "#ffffff"
+    }];
+    var count = info.allnums;
+    var y = $api.offset($api.dom('header')).h;
+    personalCenter.open({
+        'y': y,
+        'imgPath': info.avatar,
+        'userName': indexSetting.author,
+        'count': count,
+        fixedOn: api.frameName,
+        'btnArray': btnArray,
+        'showLeftBtn': false,
+        'showRightBtn': false,
+        'userNameSize': 16,
+        'userColor': '#ffffee',
+        'subTitle': "共创作图书" + count + "部",
+        'fixed': false
+    }, function(ret, err) {});
+}
+
+function loadbooklist() {
+    $api.removeCls($api.byId('loading'), 'aui-hide');
+    if (indexSetting.total >= indexSetting.current) {
+        api.ajax({
+            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=authorbooks&param=current----' + indexSetting.current + ',uid----' + indexSetting.authorid,
+            method: 'get'
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.status && (indexSetting.total >= indexSetting.current)) {
+                    indexSetting.current += 1;
+                    indexSetting.total = ret.total;
+                    var temp = $api.text($api.byId("maint-temp"));
+                    var dottemp = doT.template(temp);
+                    var html = dottemp(ret);
+                    $api.append($api.byId('maint'), html);
+                    $api.addCls($api.byId('loading'), 'aui-hide');
+                    checkguanzhu();
+                } else {
+                    $api.html($api.byId('loading'), '没有了');
+                }
+            } else {
+                toast.fail({
+                    title: err.msg,
+                    duration: 2000
+                });
+            }
+        });
+    } else {
+        $api.html($api.byId('loading'), '没有了');
+    }
+}
+//打开粉丝榜
+function openfensi(info) {
+    openwin('fensi', {
+        authorid: info.authorid,
+        author: info.author,
+        avatar: info.avatar,
+        fensinums: info.fensi,
+        authorbooknums: info.allnums
+    });
+}
+</script>
+</html>

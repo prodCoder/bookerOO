@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    .aui-tab-item{border-bottom: 1px solid #f1f1f1;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title">书评广场</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main">
+        <div class="aui-tab" id="tab">
+            <div class="aui-tab-item aui-active" id="newspbutton" onclick="togglesp('new')">最新书评</div>
+            <div class="aui-tab-item" id="hotspbutton" onclick="togglesp('hot')">最热书评</div>
+        </div>
+        <ul class="aui-list aui-media-list" id="indexlist"></ul>
+        <div id="loading" class="aui-hide aui-text-center"><span class="fa-2x fa fa-spinner fa-spin"></span></div>
+    </div>
+    <script id="indexlist-temp" type="text/x-dot-template">
+        {{? it.data.length}}
+        {{ for(var i=0,len=it.data.length;i<len;i++) { }}
+          <div class="aui-card-list aui-margin-b-0 aui-hr-after">
+            <div tapmode onclick="openbook({{=it.data[i].book_id}})" class="aui-card-list-header aui-card-list-user aui-border-t">
+                <div class="aui-card-list-user-avatar">
+                    <img src="{{? it.data[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.data[i].image}}{{??}}../image/book.png{{?}}" class="" />
+                </div>
+                <div class="aui-card-list-user-name">
+                    <div><span class="aui-text-danger">{{=it.data[i].book_name}}</span></div>
+                </div>
+                <div class="aui-card-list-user-info"><span class="aui-label aui-label-warning aui-label-outlined">{{=it.data[i].author}}</span></div>
+            </div>
+            <div class="aui-card-list-content-padded">{{=it.data[i].text}}</div>
+            <div class="aui-card-list-footer">
+                <div><i {{? indexSetting.dianping.indexOf(it.data[i].dp_id)===-1}} onclick="dianping({{=it.data[i].dp_id}},'zhichi')" {{?}} class="fa fa-thumbs-o-up" id="dpid_{{=it.data[i].dp_id}}_zhichi">{{=it.data[i].zhichi}}</i> </div>
+                <div>
+                    <i {{? indexSetting.dianping.indexOf(it.data[i].dp_id)===- 1}} onclick="dianping({{=it.data[i].dp_id}},'fandui')" {{?}} class="fa fa-thumbs-o-down" id="dpid_{{=it.data[i].dp_id}}_fandui">{{=it.data[i].fandui}}</i>
+                </div>
+                <div><i class="fa "></i> {{=it.data[i].time}}</div>
+            </div>
+          </div>
+        {{ } }}
+      {{??}}
+        <h1 class="aui-text-danger aui-text-center">暂无书评</h1>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.loading = false;
+indexSetting.current = 1;
+indexSetting.total = 2;
+indexSetting.sptype = 'new';
+indexSetting.first = 1;
+if ($api.getStorage('dianping')) {
+    indexSetting.dianping = $api.getStorage('dianping');
+} else {
+    indexSetting.dianping = [];
+}
+if ($api.getStorage('zhichi')) {
+    indexSetting.zhichi = $api.getStorage('zhichi');
+} else {
+    indexSetting.zhichi = [];
+}
+if ($api.getStorage('fandui')) {
+    indexSetting.fandui = $api.getStorage('fandui');
+} else {
+    indexSetting.fandui = [];
+}
+apiready = function() {
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    autocheckyejian();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    initload();
+    api.addEventListener({
+        name: 'scrolltobottom',
+        extra: {
+            threshold: 20
+        }
+    }, function(ret, err) {
+        if (!indexSetting.loading) {
+            indexSetting.loading = true;
+            $api.removeCls($api.byId('loading'), 'aui-hide');
+            if (indexSetting.total >= indexSetting.current) {
+                initload();
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+            }
+            indexSetting.loading = false;
+        }
+    });
+}
+
+function togglesp(type) {
+    indexSetting.current = 1;
+    indexSetting.total = 2;
+    indexSetting.sptype = type;
+    indexSetting.first = 1;
+    $api.addCls($api.byId(type + 'spbutton'), 'aui-active');
+    $api.removeCls($api.byId('loading'), 'aui-hide');
+    $api.html($api.byId('indexlist'), '');
+    var rmtype;
+    if (type == 'new') {
+        rmtype = 'hot';
+    } else {
+        rmtype = 'new';
+    }
+    $api.removeCls($api.byId(rmtype + 'spbutton'), 'aui-active');
+    initload();
+}
+
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=spgc&param=sptype----' + indexSetting.sptype + ',current----' + indexSetting.current,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                indexSetting.current += 1;
+                indexSetting.total = ret.total;
+                var temp = $api.text($api.byId("indexlist-temp"));
+                var dottemp = doT.template(temp);
+                var html = dottemp(ret);
+                if (indexSetting.first == 1) {
+                    $api.html($api.byId('indexlist'), html);
+                } else {
+                    $api.append($api.byId('indexlist'), html);
+                }
+                setTimeout(function() {
+                    for (var k = 0, klen = ret.data.length; k < klen; k++) {
+                        if (indexSetting.dianping.indexOf(parseInt(ret.data[k].dp_id)) != -1) {
+                            if (indexSetting.zhichi.indexOf(parseInt(ret.data[k].dp_id)) != -1) {
+                                $api.addCls($api.byId('dpid_' + ret.data[k].dp_id + '_zhichi'), 'aui-text-danger');
+                            } else if (indexSetting.fandui.indexOf(parseInt(ret.data[k].dp_id)) != -1) {
+                                $api.addCls($api.byId('dpid_' + ret.data[k].dp_id + '_fandui'), 'aui-text-danger');
+                            }
+                        }
+                    }
+                }, 300);
+                $api.addCls($api.byId('loading'), 'aui-hide');
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+                $api.removeCls($api.byId('loading'), 'aui-hide');
+            }
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+            $api.addCls($api.byId('loading'), 'aui-hide');
+        }
+    });
+}
+</script>
+</html>

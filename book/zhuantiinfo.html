@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title"></div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main">
+        <ul class="aui-list aui-media-list aui-list-noborder" id="indexlist"></ul>
+        <div id="loading" class="aui-hide aui-text-center"><span class="fa-2x fa fa-spinner fa-spin"></span></div>
+    </div>
+    <script id="indexlist-temp" type="text/x-dot-template">
+      {{? it.databook}}
+        {{ for(var i=0,len=it.databook.length;i<len;i++) { }}
+          {{? it.databook[i].book_name}}
+          <li class="aui-list-item aui-margin-b-10" tapmode onclick="openbook({{=it.databook[i].book_id}})">
+            <div class="aui-media-list-item-inner">
+                <div class="aui-list-item-media">
+                    <img src="{{? it.databook[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.databook[i].image}}{{??}}../image/book.png{{?}}">
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">{{=it.databook[i].book_name}}</div>
+                    </div>
+                    <div class="aui-ellipsis-2 aui-list-item-text">
+                        {{=it.databook[i].desco || '本书暂未添加简介！'}}
+                    </div>
+                    <div class="aui-info aui-margin-t-10" style="padding:0">
+                        <div class="aui-info-item">
+                            <img src="{{=it.databook[i].avatar}}" style="width:0.6rem" class="aui-img-round" /><span class="aui-margin-l-5">{{=it.databook[i].author}}</span>
+                        </div>
+                        <div class="aui-info-item">
+                            <span class="aui-label aui-label-warning aui-label-outlined">{{=it.databook[i].category_name}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </li>
+          {{?}}
+        {{ } }}
+      {{??}}
+        <li class="aui-list-header">暂无图书信息</li>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+    $api.fixStatusBar($api.dom('header'));
+    autocheckyejian();
+    api.parseTapmode();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    indexSetting.topic_id = api.pageParam.topic_id;
+    indexSetting.name = api.pageParam.name;
+    $api.text($api.byId('title'), indexSetting.name);
+    initload();
+}
+
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=zhuanti&param=topic_id----' + indexSetting.topic_id,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                var temp = $api.text($api.byId("indexlist-temp"));
+                var dottemp = doT.template(temp);
+                var html = dottemp(ret);
+                $api.html($api.byId('indexlist'), html);
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+                $api.removeCls($api.byId('loading'), 'aui-hide');
+            }
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+</script>
+</html>

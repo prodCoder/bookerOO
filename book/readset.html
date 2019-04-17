@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    body {
+        background: none !important;
+    }
+    .aui-mask {
+        background: rgba(0, 0, 0, .2);
+    }
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" onclick="readback()" tapmode>
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <a class="aui-pull-right aui-btn" tapmode onclick="openSharebox()">
+            <span class="aui-iconfont aui-icon-share"></span>
+        </a>
+        <div class="aui-title" id="title"></div>
+    </header>
+    <div class="aui-mask aui-mask-in"></div>
+    <footer class="aui-bar aui-bar-tab " id="footer">
+        <div class="aui-bar-tab-item" tapmode onclick="openthewin('mulu')">
+            <i class="fa fa-list-ul"></i>
+            <div class="aui-bar-tab-label">目录</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="setfont(2)">
+            <i class="fa fa-font"></i>
+            <div class="aui-bar-tab-label">增大</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="setfont(-2)">
+            <i class="fa fa-font"></i>
+            <div class="aui-bar-tab-label">减小</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="openthewin('shuping')">
+            <i class="fa fa-commenting-o"></i>
+            <div class="aui-bar-tab-label">书评</div>
+        </div>
+    </footer>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-sharebox.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+var sharebox = new auiSharebox();
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+    autocheckyejian();
+    api.parseTapmode();
+    indexSetting.book_id = api.pageParam.book_id;
+    indexSetting.book_name = api.pageParam.book_name;
+    indexSetting.image = api.pageParam.image;
+    indexSetting.desco = api.pageParam.desco;
+    indexSetting.colum_id = api.pageParam.colum_id;
+    indexSetting.zhangjie = api.pageParam.zhangjie;
+    indexSetting.subject = api.pageParam.subject;
+    indexSetting.price = api.pageParam.price;
+    indexSetting.authorid = api.pageParam.authorid;
+    $api.text($api.byId('title'), '[' + indexSetting.book_name + ']');
+    $api.addEvt($api.dom(".aui-mask"), 'click', function() {
+        api.closeFrame();
+    });
+
+
+}
+
+function openSharebox() {
+    sharebox.init({
+        buttons: [{
+            image: '../image/icon/qq.png',
+            text: 'QQ好友',
+            value: 'qq'
+        }, {
+            image: '../image/icon/qzone.png',
+            text: 'QQ空间',
+            value: 'qq-qzone'
+        }, {
+            image: '../image/icon/wechat.png',
+            text: '微信',
+            value: 'wx' //可选
+        }, {
+            image: '../image/icon/quan.png',
+            text: '朋友圈',
+            value: 'wx-circle'
+        }],
+        col: 4,
+        cancelTitle: '关闭'
+    }, function(ret) {
+        if (ret) {
+            toast.fail({
+                            title: '努力打开中...',
+                            duration: 2000
+                        });
+            if (ret.buttonValue == 'qq' || ret.buttonValue == 'qq-qzone') {
+                var qq = api.require('qq');
+                qq.shareNews({
+                    url: indexSetting.url + '../plugin.php?id=jameson_read&contrl=touch&act=book&book_id=' + indexSetting.book_id + '&laiyuan=app',
+                    title: indexSetting.book_name,
+                    description: indexSetting.desco ? indexSetting.desco : ' ',
+                    type: (ret.buttonValue == 'qzone' ? 'QZone' : 'QFriend'),
+                    imgUrl: indexSetting.url + '../' + (indexSetting.image ? ('data/attachment/forum/' + indexSetting.image) : 'source/plugin/jameson_read/images/book.jpg')
+                }, function(retqq, errqq) {
+                    if (retqq.status) {
+                        toast.success({
+                            title: '分享成功',
+                            duration: 2000
+                        });
+                    }
+                });
+            } else if (ret.buttonValue == 'wx' || ret.buttonValue == 'wx-circle') {
+                var wx = api.require('wx');
+                wx.shareWebpage({
+                    scene: (ret.buttonValue == 'wx' ? 'timeline' : 'session'),
+                    title: indexSetting.book_name,
+                    description: indexSetting.desco ? indexSetting.desco : ' ',
+                    thumb: 'widget://image/book.png',
+                    contentUrl: indexSetting.url + '../plugin.php?id=jameson_read&contrl=touch&act=book&book_id=' + indexSetting.book_id + '&laiyuan=app'
+                }, function(retwx, errwx) {
+                    if (retwx.status) {
+                        toast.success({
+                            title: '分享成功',
+                            duration: 2000
+                        });
+                    } else {
+                        var msgwx;
+                        switch (errwx.code) {
+                            case -1:
+                                msgwx = '未知错误';
+                                break;
+                            case 1:
+                                msgwx = 'apikey非法';
+                                break;
+                            case 4:
+                                msgwx = '授权拒绝';
+                        }
+                        if (msgwx) {
+                            toast.fail({
+                                title: msgwx,
+                                duration: 2000
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    })
+}
+
+function readback() {
+    api.setFullScreen({
+        fullScreen: false
+    });
+    api.execScript({
+        name: 'read',
+        script: 'ajaxhistory(indexSetting.colum_id, indexSetting.zhangjie, indexSetting.subject, indexSetting.price);indexSetting.bookReader.close(function(ret, err) {});api.closeWin()'
+    });
+    api.closeFrame();
+}
+
+function setfont(num) {
+    if (num > 0) {
+        api.execScript({
+            name: 'read',
+            script: 'indexSetting.fontsize = indexSetting.fontsize+2;indexSetting.bookReader.setValue({textStyle: {size: indexSetting.fontsize+2,color: indexSetting.color}}, function(ret, err) {});'
+        });
+    } else {
+        api.execScript({
+            name: 'read',
+            script: 'indexSetting.fontsize = indexSetting.fontsize-2;indexSetting.bookReader.setValue({textStyle: {size: indexSetting.fontsize-2,color: indexSetting.color}}, function(ret, err) {});'
+        });
+    }
+}
+
+function openthewin(name) {
+    api.setFullScreen({
+        fullScreen: false
+    });
+    api.openWin({
+        name: name+'_'+indexSetting.book_id,
+        url: './' + name + '.html',
+        rect: {
+            x: 0,
+            y: 0,
+            w: api.winWidth,
+            h: api.winHeight
+        },
+        useWKWebView:true,
+        historyGestureEnabled:true,
+        pageParam:{
+            book_id: indexSetting.book_id,
+            book_name: indexSetting.book_name,
+            from: 'read',
+            authorid: indexSetting.authorid
+        },
+        bgColor: "#F5F5F5",
+        reload: false,
+        bounces: false,
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: false,
+        animation: {
+            type: "push",
+            subType: "from_right",
+            duration: 300
+        }
+    });
+}
+</script>
+</html>

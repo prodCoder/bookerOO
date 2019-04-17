@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav transparent" id="header">
+        <a class="aui-pull-left aui-btn" onclick="back()">
+            <i class="aui-iconfont aui-icon-left"></i>
+        </a>
+        <div class="aui-title" id="title"></div>
+    </header>
+    <div id="main">
+        <div id="loading" class="aui-text-center" style="margin-top: 4rem;"><span class=" fa fa-spinner fa-spin fa-3x"></span></div>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    autocheckyejian();
+    $api.text($api.byId('title'), api.pageParam.title);
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    var obj = api.require('webBrowser');
+    var weburl = $api.trim(api.pageParam.href);
+    obj.openView({
+        rect: {
+            x: 0,
+            y: $api.offset($api.dom('header')).h,
+            w: 'auto',
+            h: 'auto'
+        },
+        progress: {
+            color: "#e51c23"
+        },
+        url: weburl
+    }, function(ret) {});
+};
+</script>
+</html>

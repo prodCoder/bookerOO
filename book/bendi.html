@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #main .bendibookfm {
+        position: relative;
+        display: block;
+        margin: 0.3rem auto;
+        width: 95%;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
+        height: 7.5rem;
+        background: url('../image/icon/txt.png') right top no-repeat #f7e9cd;
+    }
+    #main .bendibookfm.notxt {
+        background-image: none;
+    }
+    #main .bendibookfm.remove {
+        background-color: #e51c23
+    }
+    #main .bendibookfm .title {
+        position: absolute;
+        left: 0;
+        text-align: center;
+        right: 0;
+        bottom: 0rem;
+        height: 2rem;
+        line-height: 2rem;
+        width: 100%;
+        background: rgba(255, 255, 255, .7);
+        overflow: hidden;white-space: nowrap;text-overflow: ellipsis;
+    }
+    #main .percent {
+        color: #999999;
+        position: absolute;
+        width: 100%;
+        left: 50%;
+        margin-left: -50%;
+        top: 2.5rem;
+        text-align: center;
+    }
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title">本机图书</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="daoru()">
+            <span class="fa fa-plus"></span>
+        </a>
+        <a class="aui-pull-right aui-btn " tapmode onclick="deletebook()" id="deletebook">
+            <span class="fa fa-edit"></span>
+        </a>
+    </header>
+    <div id="main"></div>
+    <script id="main-temp" type="text/x-dot-template">
+      {{? it.data && it.data.length}}
+        <div class="aui-row yuedurow" id="yuedurow">
+          {{ for(var i=0,len=it.data.length;i<len;i++) { }}
+            <div class="aui-col-xs-4" onclick="openbendi('{{=it.data[i].url}}','{{=it.data[i].name}}','utf8')">
+                <div class="aui-content-padded bendibookfm">
+                    <div class=" aui-font-size-16 percent">{{=it.data[i].percent}}%</div>
+                    <div class="aui-ellipsis-1 title aui-font-size-14 aui-text-primary">{{=it.data[i].name}}</div>
+                </div>
+            </div>
+          {{ } }}
+        </div>
+      {{??}}
+        <div class="aui-row">
+            <div class="aui-col-xs-4" onclick="daoru()">
+                <div class="aui-content-padded bendibookfm notxt">
+                    <div class=" aui-font-size-16 percent"><span style="color:#fff" class="fa fa-plus fa-2x"></span></div>
+                    <div class="aui-ellipsis-1 title aui-font-size-14 ">导入本机图书</div>
+                </div>
+            </div>
+        </div>
+      {{?}}
+
+      {{? it.data && it.data.length}}
+        <div class="aui-hide aui-row" id="editrow">
+          {{ for(var j=0,jlen=it.data.length;j<jlen;j++){ }}
+            <div id="book_{{=j}}" tapmode onclick="select('{{=it.data[j].url}}',{{=j}})" class="aui-col-xs-4 ">
+                <div class="bendibookfm aui-content-padded remove">
+                    <div class=" aui-font-size-16 percent">{{=it.data[j].percent}}%</div>
+                    <div class="aui-ellipsis-1 title aui-font-size-14 aui-text-danger"><i class="fa fa-remove"></i>{{=it.data[j].name}}</div>
+                </div>
+                <div class="aui-text-center aui-margin-b-5">
+                    <label>
+                        <input class="aui-checkbox" type="checkbox" name="checkbox" id="check_{{=j}}"> </label>
+                </div>
+            </div>
+          {{ } }}
+        </div>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+autocheckyejian();
+var toast =  new auiToast({})
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.select = new Array();
+apiready = function() {
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    initload();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+}
+function select(url, id) {
+    if ($api.attr($api.byId('check_' + id), 'checked')) {
+        //移除
+        for (var i = 0, len = indexSetting.select.length; i < len; i++) {
+            if (indexSetting.select[i] == id) {
+                indexSetting.select.splice(i, 1);
+            }
+        }
+        $api.removeAttr($api.byId('check_' + id), 'checked');
+    } else {
+        //添加
+        indexSetting.select.push(id);
+        $api.attr($api.byId('check_' + id), 'checked', 'checked');
+    }
+}
+
+function deletebook() {
+    if ($api.getStorage('bendibook')) {
+        indexSetting.bendibook = $api.getStorage('bendibook');
+        $api.html($api.byId('deletebook'), '<span class="fa fa-remove aui-text-danger">删除</span>');
+    } else {
+        indexSetting.bendibook = {
+            data: []
+        };
+        toast.fail({
+            title: '还没有导入本地图书',
+            duration: 2000
+        });
+        return false;
+    }
+    var bendibook = $api.getStorage('bendibook');
+    if (indexSetting.select.length) {
+        for (var i = 0, len = indexSetting.select.length; i < len; i++) {
+            indexSetting.bendibook.data.splice(indexSetting.select[i], 1)
+        }
+        $api.setStorage('bendibook', indexSetting.bendibook);
+        indexSetting.select = new Array();
+        api.refreshHeaderLoading();
+        $api.html($api.byId('deletebook'), '<span class="fa fa-edit"></span>');
+    } else {
+        //如果当前editrow是
+        $api.toggleCls($api.byId('yuedurow'), 'aui-hide');
+        $api.toggleCls($api.byId('editrow'), 'aui-hide');
+        if ($api.hasCls($api.byId('yuedurow'), 'aui-hide')) {
+            $api.html($api.byId('deletebook'), '<span class="fa fa-remove aui-text-danger">删除</span>');
+        } else {
+            $api.html($api.byId('deletebook'), '<span class="fa fa-edit"></span>');
+        }
+    }
+}
+
+function initload() {
+    if ($api.getStorage('bendibook')) {
+        indexSetting.bendibook = $api.getStorage('bendibook');
+    } else {
+        indexSetting.bendibook = {
+            data: []
+        };
+    }
+    var temp = $api.text($api.byId("main-temp"));
+    var dottemp = doT.template(temp);
+    var html = dottemp(indexSetting.bendibook);
+    $api.html($api.byId('main'), html);
+
+    toast.hide();
+}
+
+function openbendi(url, name, code) {
+    openwin('readbendi', {
+            url: url,
+            name: name,
+            bianma: code
+        })
+}
+
+function daoru() {
+    //导入图书
+    if ($api.getStorage('bendibook')) {
+        indexSetting.bendibook = $api.getStorage('bendibook');
+    } else {
+        indexSetting.bendibook = {
+            data: []
+        };
+    }
+    var fileBrowser = api.require('fileBrowser');
+    fileBrowser.open(function(ret, err) {
+        if (ret) {
+            var url = $api.trim(ret.url);
+            var lastpos = url.lastIndexOf('.');
+            var filename = url.substring(url.lastIndexOf('/') + 1, lastpos);
+            var ext = url.substring(lastpos + 1);
+            if (ext.toLocaleLowerCase() == 'txt') {
+                var isin = false;
+                for (var i = 0, len = indexSetting.bendibook.data.length; i < len; i++) {
+                    if (url == indexSetting.bendibook.data[i].url) {
+                        isin = true;
+                    }
+                }
+                if (!isin) {
+                    indexSetting.bendibook.data.unshift({
+                        name: filename,
+                        url: url,
+                        percent: 0
+                    });
+                }
+                $api.setStorage('bendibook', indexSetting.bendibook);
+                var fileBrowser = api.require('fileBrowser');
+                fileBrowser.close();
+                api.execScript({
+                    name: "bendi",
+                    script: 'api.refreshHeaderLoading()'
+                });
+            }
+        } else {
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}
+</script>
+</html>

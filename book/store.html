@@ -1,0 +1,545 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #read_history {
+        position: relative;
+        margin:0;
+        padding: 0;
+        vertical-align: middle;
+    }
+    #read_history .single {
+      margin:0 0.25rem;
+      padding: 0;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      white-space: nowrap;
+    }
+    #read_history .onebook {
+        position: relative;
+        display: inline-block;
+        text-align: center;
+        margin:15px 8px 0;
+        padding: 0;
+        width: 4rem;
+        overflow: hidden;
+    }
+    #read_history .onebook .jindu {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4rem;
+        background: rgba(0, 0, 0, .4);
+        color: #fff;
+    }
+
+    #read_history img {
+        display: block;
+        width: 4rem;
+        box-shadow: 0 0 6px rgba(0, 0, 0, .3);
+    }
+
+    #book_store {
+        position: relative;
+    }
+
+    #gonggao {
+        overflow: hidden;
+        height: 1.8rem;
+        line-height: 1.8rem;
+        padding-left: 0.5rem;
+        position: relative;;
+    }
+
+    #gonggao .right {
+        position: absolute;
+        right: 0.5rem;
+    }
+
+    #avatarwrap {
+        vertical-align: middle;
+    }
+
+    .morenstore {
+        position: relative;
+    }
+
+    #list-list .morenstore .aui-label {
+        position: absolute;
+        left: 0;
+        top: 0.5rem;
+        z-index: 6;
+    }
+    #jingxuanleft{z-index: -2;}
+    #jingxuanleft.aui-popup-in{z-index: 9999;}
+    .relative{position: relative;}
+    .relative .aui-label{position: absolute;left: 0;top: 10px;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" onclick="openslide()" tapmode>
+            <span id="avatarwrap" class="aui-iconfont" style="display:inline-block;overflow: hidden;text-align: center;"><img id="avatar" src="../image/liulangnan.png" style="margin:auto;width:24px;height:24px;border-radius: 50%;"></span>
+        </a>
+        <div id="title" class="aui-title">我的书架</div>
+        <a class="aui-pull-right aui-btn" tapmode aui-popup-for="jingxuanleft">
+            <span class="fa  fa-fw fa-navicon"></span>
+        </a>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div class="aui-popup aui-popup-top-right" id="jingxuanleft" style="top:2.5rem">
+        <div class="aui-popup-arrow"></div>
+        <div class="aui-popup-content">
+            <ul class="aui-list aui-list-noborder">
+                <li class="aui-list-item" tapmode onclick="editstore()">
+                    <div class="aui-list-item-label-icon">
+                        <i class="fa fa-fw fa-edit aui-text-info"></i>
+                    </div>
+                    <div class="aui-list-item-inner">
+                        编辑书架
+                    </div>
+                </li>
+                <li class="aui-list-item" tapmode onclick="openbendi()">
+                    <div class="aui-list-item-label-icon">
+                        <i class="fa fa-fw fa-window-restore aui-text-danger"></i>
+                    </div>
+                    <div class="aui-list-item-inner">
+                        本地图书
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="main"></div>
+    <script type="text/x-dot-template" id="main-temp">
+      {{? it.historybook && it.historybook.data && $api.isArray(it.historybook.data) && it.historybook.data.length > 0}}
+        <div id="read_history" class="aui-text-center aui-background-white">
+            <div class="single">
+                {{ for(var m=0,mlen=it.historybook.data.length;m<mlen;m++) { }}
+                  <div class="onebook" onclick="openhistoryread({{=it.historybook.data[m].book_id}},{{=it.historybook.data[m].colums}},{{=it.historybook.data[m].colum_id}},'{{=it.historybook.data[m].zhangjie}}','{{=it.historybook.data[m].subject}}','{{=it.historybook.data[m].book_name}}','{{=it.historybook.data[m].image}}','{{=it.historybook.data[m].progress}}')">
+                    {{? it.historybook.data[m].subject}}<span class="aui-label jindu aui-ellipsis-1">{{=it.historybook.data[m].subject}}</span>{{?}}
+                    <img style="width:4rem;" src="{{? it.historybook.data[m].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.historybook.data[m].image}}{{??}}../image/book.png{{?}}" alt="" />
+                    <span class="aui-text-center aui-font-size-12 aui-ellipsis-1">{{=it.historybook.data[m].book_name}}</span>
+                  </div>
+                {{ } }}
+            </div>
+        </div>
+      {{?}}
+      {{?it.gonggao && it.gonggao.length}}
+      <div id="gonggao" class="aui-margin-t-5 aui-background-white">
+          {{ for(var n=0,nlen=it.gonggao.length;n<nlen;n++) { }}
+            <div class="{{? n>0}}aui-hide{{?}} gonggaolist" id="gonggaolist_{{=n}}" onclick="openwebpage('{{=it.gonggao[n].url}}','{{=it.gonggao[n].image}}')">
+              <i class="fa fa-bookmark aui-text-danger"></i>
+              <span class="aui-text-primary aui-font-size-14">{{=it.gonggao[n].image}}</span>
+              <i class="aui-iconfont aui-icon-right right"></i>
+            </div>
+          {{ } }}
+      </div>
+      {{?}}
+      <div id="book_store" class="aui-background-white aui-margin-t-5">
+        <ul class="aui-list aui-media-list   aui-list-noborder" id="list-list">
+        {{? it.data && it.data.length}}
+          {{ for (var i=0,len=it.data.length;i<len;i++) { }}
+          <li class="aui-list-item aui-margin-b-5">
+              <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.data[i].book_id}})">
+                  <div class="aui-list-item-media relative">
+                      <span class="aui-label aui-label-danger">推荐</span>
+                      <img src="{{? it.data[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.data[i].image}}{{??}}../image/book.png{{?}}">
+                  </div>
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-text">
+                          <div class="aui-list-item-title aui-ellipsis-1">
+                              {{=it.data[i].book_name}}
+                          </div>
+                      </div>
+                      <div class="aui-list-item-text">
+                          {{=it.data[i].desco || '暂无图书描述'}}
+                      </div>
+                      <div class="aui-info aui-margin-t-10" style="">
+                          <div class="aui-info-item">
+                              <img src="{{? it.data[i].avatar}}{{=it.data[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                              <span class="aui-margin-l-5">{{=it.data[i].author}}</span>
+                          </div>
+                          <div class="aui-info-item">
+                              <span class="">已更新{{=it.data[i].colums}}章</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </li>
+          {{ } }}
+          {{?}}
+
+          {{? it.bookstore && it.bookstore.data}}
+            {{ for (var i=0,len=it.bookstore.data.length;i<len;i++) { }}
+            <li class="aui-list-item aui-margin-b-5">
+                <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.bookstore.data[i].book_id}})">
+                    <div class="aui-list-item-media">
+                        <!--<img src="{{? it.bookstore.data[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.bookstore.data[i].image}}{{??}}../image/book.png{{?}}">-->
+                        <img src="{{? it.bookstore.data[i].image}}{{=it.bookstore.data[i].image}}{{??}}../image/book.png{{?}}">
+
+                    </div>
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-text">
+                            <div class="aui-list-item-title aui-ellipsis-1">
+                                {{=it.bookstore.data[i].book_name}}
+                            </div>
+                        </div>
+                        <div class="aui-list-item-text">
+                            {{=it.bookstore.data[i].desco || '暂无图书描述'}}
+                        </div>
+                        <div class="aui-info aui-margin-t-10" style="">
+                            <div class="aui-info-item">
+                                <img src="{{? it.bookstore.data[i].avatar}}{{=it.bookstore.data[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                                <span class="aui-margin-l-5">{{=it.bookstore.data[i].author}}</span>
+                            </div>
+                            <div class="aui-info-item">
+                                <span class="">已更新{{=it.bookstore.data[i].colums}}章</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {{ } }}
+          {{?}}
+
+        </ul>
+      </div>
+  </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-popup.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+// toast.loading({
+//     title:"loading...",
+//     duration:2000
+// })
+var popup = new auiPopup();
+var indexSetting = $api.getStorage('appinfo');
+var timer = null;
+if ($api.getStorage('localstore')) {
+    indexSetting.localstore = ($api.getStorage('localstore'));
+} else {
+    indexSetting.localstore = {
+        "data": []
+    };
+}
+apiready = function() {
+    autocheckyejian();
+    ajaxuser();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    if (api.statusBarAppearance) {
+        if (api.systemType == 'android') {
+            indexSetting.statbar = 25;
+        } else {
+            indexSetting.statbar = 20;
+        }
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+    } else {
+        indexSetting.statbar = 0;
+    }
+
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    indexSetting.fs = api.require('fs');
+    initload();
+    checkstatus();
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        ajaxuser();
+        indexSetting.history = $api.getStorage('history');
+        indexSetting.localstore = $api.getStorage('localstore');
+        setTimeout(function() {
+            indexSetting.userinfo = $api.getStorage('userinfo');
+            checkstatus();
+        }, 1000);
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+
+function playgonggao() {
+  if(!$api.byId('gonggao')){
+    return false;
+  }
+    clearTimeout(timer);
+    var len = indexSetting.gonggaolength;
+    if (len) {
+        for (var i = 0; i < len; i++) {
+            if (!$api.hasCls($api.byId('gonggaolist_' + i), 'aui-hide')) {
+                $api.addCls($api.byId('gonggaolist_' + i), 'aui-hide');
+                if (i < len - 1) {
+                    $api.removeCls($api.byId('gonggaolist_' + (i + 1)), 'aui-hide');
+                } else {
+                    $api.removeCls($api.byId('gonggaolist_0'), 'aui-hide');
+                }
+                break;
+            }
+        }
+    }
+    timer = setTimeout(function() {
+        playgonggao();
+    }, 5000);
+}
+
+function openbendi() {
+    api.openWin({
+        name: 'bendi',
+        url: './bendi.html',
+        rect: {
+            x: 0,
+            y: 0,
+            w: api.winWidth,
+            h: api.winHeight
+        },
+        useWKWebView:true,
+        historyGestureEnabled:true,
+        bgColor: "#ffffff",
+        bounces: true,
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: false,
+        animation: {
+            type: "push",
+            subType: "from_right",
+            duration: 300
+        },
+        reload: true
+    });
+}
+
+function editstore() {
+    api.openWin({
+        name: 'editstore',
+        url: './edit_store.html',
+        rect: {
+            x: 0,
+            y: 0,
+            w: api.winWidth,
+            h: api.winHeight
+        },
+        useWKWebView:true,
+        historyGestureEnabled:true,
+        bgColor: "#ffffff",
+        bounces: false,
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: false,
+        animation: {
+            type: "push",
+            subType: "from_right",
+            duration: 300
+        },
+        reload: true
+    });
+
+}
+//  初始化
+function initload() {
+    var hasbendi = [];
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    indexSetting.history = $api.getStorage('history');
+        // api.ajax({
+        //     url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=store&param=bbsuid----' + indexSetting.userinfo.bbsuid,
+        //     method: 'get'
+        // }, function(ret, err) {
+        var ret = {
+        	"status": 1,
+        	"bookstore": {
+        		"data": [{
+        				"book_id": "0001",
+        				"image": "https://www.bxwx9.org/modules/article/images/nocover.jpg",
+        				"book_name": "我欲封天",
+        				"desco": "这是一本好书",
+        				"avatar": "",
+        				"author": "超级大坦克科比",
+        				"colums": 100
+        			}
+        		]
+        	}
+        };
+            if (ret) {
+                if (ret.status) {
+                    var temp = $api.text($api.byId("main-temp"));
+                    var dottemp = doT.template(temp);
+                    ret.historybook = indexSetting.history;
+                    var localstore = $api.getStorage('localstore');
+                    if(indexSetting.userinfo.uid && indexSetting.userinfo.bbsuid){
+                        if(localstore && localstore.data){
+                            localstore.data.forEach(function(book){
+                                hasbendi.push(book.book_id)
+                            })
+                        }
+                        if(hasbendi && ret.bookstore && ret.bookstore.data){
+                            ret.bookstore.data.forEach(function(book2){
+                                if(hasbendi.indexOf(book2.book_id) !== -1){
+                                    hasbendi.splice(hasbendi.indexOf(book2.book_id),1);
+                                }
+                            })
+                        }
+                        if(hasbendi){
+                            hasbendi.forEach(function(bid){
+                                api.ajax({
+                                    url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=addstore&param=book_id----' + bid + ',bbsuid----' + indexSetting.userinfo.bbsuid,
+                                    method: 'get'
+                                }, function(ret, err) {
+                                    if (ret) {}
+                                });
+                            })
+                        }
+                    }else{
+                        ret.bookstore = localstore?localstore:{data:[]};
+                    }
+                    var html = dottemp(ret);
+                    $api.html($api.byId('main'), html);
+                    toast.hide();
+                    $api.setStorage('localstore', ret.bookstore);
+                    if($api.byId('gonggao')){
+                      timer = setTimeout(function() {
+                        playgonggao();
+                      }, 5000);
+                    }
+                } else {
+                    toast.fail({
+                        title: ret.error,
+                        duration: 2000
+                    });
+                }
+            }
+        //     else {
+        //         var msg = JSON.stringify(err);
+        //         toast.fail({
+        //             title: msg.msg,
+        //             duration: 2000
+        //         });
+        //     }
+        // });
+}
+
+function openslide() {
+    var islogin = 0;
+    var url = 'login';
+    if (indexSetting.userinfo && indexSetting.userinfo.uid) {
+        islogin = 1;
+        url = 'userinfo';
+    }
+    openwin(url,{
+        from: "store",
+        islogin: islogin
+    });
+}
+
+function checkstatus() {
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    $api.attr($api.byId('avatar'), 'src', indexSetting.userinfo.avatar);
+}
+
+function openhistoryread(book_id, colums, colum_id, zhangjie, subject, book_name, image, progress) {
+    if (parseInt(colums) < 1) {
+        openbook(book_id);
+    } else {
+        openzhangjie(book_id, colum_id, zhangjie, subject, book_name, image, progress);
+    }
+}
+
+//下载
+function down(book_id, colum_id) {
+    api.download({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=downbook&param=book_id----' + book_id + ',colum_id----' + colum_id,
+        savePath: 'fs://' + book_id + '_' + colum_id + '.txt',
+        report: true,
+        cache: true,
+        allowResume: true
+    }, function(ret, err) {
+        if (ret.state == 1) {
+            indexSetting.download = true;
+            return true;
+        } else if (ret.state == 2) {
+            toast.fail({
+                msg: '下载失败',
+                duration: 2000
+            });
+            indexSetting.download = false;
+            return false;
+        }
+    });
+}
+function tixinglogin() {
+      // 未在登录且绑定状态则进行提醒
+    var dialog = new auiDialog({})
+    dialog.alert({
+        title: '请登录',
+        msg: '请登录后阅读！',
+        buttons: ['取消', '去登录']
+    }, function(ret) {
+        if (ret) {
+            if (ret.buttonIndex == 2) {
+                openwin('login', {
+                        from: "store",
+                        book_id: indexSetting.book_id
+                })
+            }
+        }
+    })
+}
+
+//阅读
+function openzhangjie(book_id, colum_id, zhangjie, subject, book_name, image, progress) {
+  var userinfo = $api.getStorage('userinfo');
+  if (!userinfo || userinfo.bbsuid < 1 || userinfo.uid < 1) {
+      tixinglogin();
+      return false;
+  }
+    api.openWin({
+        name: 'read',
+        url: './read.html',
+        rect: {
+            x: 0,
+            y: 0,
+            w: api.winWidth,
+            h: api.Height
+        },
+        useWKWebView:true,
+        historyGestureEnabled:true,
+        pageParam: {
+            book_id: book_id,
+            book_name: book_name,
+            image: image,
+            desco: '',
+            colum_id: colum_id,
+            zhangjie: zhangjie,
+            subject: subject,
+            progress: progress
+        },
+        bgColor: "#ffffff",
+        bounces: false,
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: false,
+        animation: {
+            type: "push",
+            subType: "from_right",
+            duration: 300
+        },
+        reload: true
+    });
+}
+</script>
+</body>
+</html>

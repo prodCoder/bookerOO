@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title" id="title"></div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main"></div>
+    <div id="loading" class="aui-text-center aui-hide aui-font-size-14">
+        <i class="fa fa-spinner fa-spin fa-2x"></i>
+    </div>
+    <script id="main-temp" type="text/x-dot-template">
+        <ul class="aui-list aui-media-list aui-margin-t-10 aui-list-noborder" id="list-list">
+          {{? it.bookstore}}
+            {{ for (var i=0,len=it.bookstore.length;i<len;i++) { }}
+            <li class="aui-list-item aui-margin-b-5">
+                <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.bookstore[i].book_id}})">
+                    <div class="aui-list-item-media">
+                        <img src="{{? it.bookstore[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.bookstore[i].image}}{{??}}../image/book.png{{?}}">
+                    </div>
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-text">
+                            <div class="aui-list-item-title aui-ellipsis-1">
+                                {{=it.bookstore[i].book_name}}
+                            </div>
+                        </div>
+                        <div class="aui-list-item-text">
+                            {{=it.bookstore[i].desco || '暂无图书描述'}}
+                        </div>
+                        <div class="aui-info aui-margin-t-10" style="">
+                            <div class="aui-info-item">
+                                <img src="{{? it.bookstore[i].avatar}}{{=it.bookstore[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                                <span class="aui-margin-l-5">{{=it.bookstore[i].author}}</span>
+                            </div>
+                            <div class="aui-info-item">
+                                <span class="">已更新{{=it.bookstore[i].colums}}章</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {{ } }}
+          {{??}}
+            <li class="aui-list-header">没有找到图书</li>
+          {{?}}
+        </ul>
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.current = 1;
+indexSetting.total = 2;
+indexSetting.loading = false;
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    indexSetting.text = api.pageParam.text;
+    $api.text($api.byId('title'), '[搜索]' + indexSetting.text);
+    indexSetting.page = api.pageParam.page;
+    searchaction();
+    api.addEventListener({
+        name: 'scrolltobottom',
+        extra: {
+            threshold: 20
+        }
+    }, function(ret, err) {
+        if (!indexSetting.loading) {
+            if (indexSetting.total >= indexSetting.current) {
+                indexSetting.loading = true;
+                $api.removeCls($api.byId('loading'), 'aui-hide');
+                searchaction();
+                indexSetting.loading = false;
+            } else {
+                $api.html($api.byId('loading'), '没有了');
+            }
+        }
+    });
+};
+
+function searchaction() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=search&param=current----' + indexSetting.current + ',text----' + indexSetting.text,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            indexSetting.current += 1;
+            indexSetting.total = ret.total;
+            var temp = $api.text($api.byId("main-temp"));
+            var dottemp = doT.template(temp);
+            var html = dottemp(ret);
+            $api.append($api.byId('main'), html);
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+</script>
+</html>

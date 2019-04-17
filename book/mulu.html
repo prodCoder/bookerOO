@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" onclick="muluback()">
+            <i class="aui-iconfont aui-icon-left"></i>
+        </a>
+        <div class="aui-title" id="title">目录</div>
+    </header>
+    <div id="main" class="aui-margin-t-0"></div>
+    <script type="text/x-dot-template" id="main-temp">
+        <ul class="aui-list aui-margin-t-0">
+          {{? it.data}}
+          {{ for (var i=0,len=it.data.length;i<len;i++) { }}
+            <li class="{{? len<2}}aui-hide{{?}}aui-list-header aui-text-center juantitle aui-padded-t-5 aui-padded-b-5">{{=it.data[i].j_title}}</li>
+              {{ for(var j=0,jlen=it.data[i].zhangjie.length;j<jlen;j++) { }}
+              <li class="aui-list-item" tapmode onclick="openzhangjie({{=it.data[i].zhangjie[j].colum_id}},'{{=it.data[i].zhangjie[j].zhangjie}}','{{=it.data[i].zhangjie[j].subject}}',{{=it.data[i].zhangjie[j].price}})">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                  <div class="aui-list-item-title">{{=it.data[i].zhangjie[j].subject}}</div>
+                </div>
+              </li>
+              {{ } }}
+          {{ } }}
+          {{??}}
+            <li class="aui-list-header">本书暂无章节</li>
+          {{?}}
+        </ul>
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.ids = [];
+apiready = function() {
+    autocheckyejian();
+    ajaxuser();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    indexSetting.fs = api.require('fs');
+    $api.text($api.byId('title'), '[目录]' + api.pageParam.book_name);
+    indexSetting.book_name = api.pageParam.book_name;
+    indexSetting.book_id = api.pageParam.book_id;
+    indexSetting.authorid = api.pageParam.authorid;
+    indexSetting.from = api.pageParam.from;
+    indexSetting.fs       = api.require('fs');
+    indexSetting.bookReader = api.require('bookReader');
+    indexSetting.userinfo = $api.getStorage('userinfo');
+    initload();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            muluback();
+        }
+    });
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+
+function muluback() {
+    if (indexSetting.from && (indexSetting.from == 'read')) {
+        api.setFullScreen({
+            fullScreen: true
+        });
+        api.execScript({
+            name: 'read',
+            frameName: 'readset',
+            script: 'api.closeFrame()'
+        });
+        back();
+    } else {
+    	api.setFullScreen({
+            fullScreen: false
+        });
+        back();
+    }
+}
+//  初始化
+function initload() {
+  	toast.loading({
+  		title:"loading",
+  		duration:2000
+  	})
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=mulu&param=book_id----' + indexSetting.book_id,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            if (ret.status) {
+                var temp = $api.text($api.byId("main-temp"));
+                var dottemp = doT.template(temp);
+                var html = dottemp(ret);
+                indexSetting.bookinfo = ret.bookinfo;
+                $api.html($api.byId('main'), html);
+            } else {
+                toast.fail({
+                    title: ret.error,
+                    duration: 2000
+                });
+            }
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+        toast.hide();
+    });
+
+}
+//下载
+function down(colum_id,zhangjie,subject,price) {
+  var filepath = 'fs://' + indexSetting.book_id + '_' + colum_id + '.txt';
+  api.ajax({
+	    url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=bookstr&param=book_id----' + indexSetting.book_id + ',colum_id----' + colum_id,
+	    method: 'get',
+	    dataType:"text",
+	    timeout:60
+	}, function(ret, err) {
+	  if (ret) {
+	    indexSetting.fs.createFile({
+			  path: filepath
+			}, function(ret0, err0) {
+		    if (ret0.status) {
+					indexSetting.fs.open({
+					    path: filepath,
+					    flags: 'read_write'
+					}, function(retd, errd) {
+					  if (retd.status) {
+					    indexSetting.fs.write({
+							    fd: retd.fd,
+							    data:ret
+							}, function(ret2, err2) {
+							    if (ret2.status) {
+							    	    //加载阅读器 start
+							    	    openwin('read', {
+							                book_id: indexSetting.book_id,
+							                book_name: indexSetting.book_name,
+							                image: indexSetting.bookinfo.image,
+							                desco: indexSetting.bookinfo.desco,
+							                colum_id: colum_id,
+							                zhangjie: zhangjie,
+							                subject: subject,
+							                price:price,
+							                progress:0
+							       		});
+							       		setTimeout(function(){
+							        		toast.hide()
+							        	},1000)
+							    } else {
+							    	toast.fail({
+						                title: '下载失败,errorcode=6',
+						                duration: 2000
+						            });
+							    }
+							});
+					  } else {
+					    	toast.fail({
+						        title:'下载失败,'+errd.msg,
+						        duration:2000
+						    })
+					  }
+					});
+			  } else {
+			    	toast.fail({
+				        title:'下载失败,'+err0.msg,
+				        duration:2000
+				    })
+			  }
+			});
+	  } else {
+	    	toast.fail({
+                title: '下载失败,errorcode=3',
+                duration: 2000
+            });
+	  }
+	});
+}
+//阅读
+function openzhangjie(colum_id, zhangjie, subject, price) {
+    indexSetting.params = [colum_id, zhangjie, subject, price];
+  //提醒登录或绑定
+        var userinfo = $api.getStorage('userinfo');
+        if (userinfo.bbsuid < 1 || userinfo.uid < 1) {
+            tixinglogin();
+        } else {
+            //购买过，或者可读
+            checkdownload(indexSetting.params[0], indexSetting.params[1], indexSetting.params[2], indexSetting.params[3]);
+        }
+}
+
+
+function checkdownload(colum_id, zhangjie, subject, price) {
+	toast.loading({
+		title:"loading",
+		duration:2000
+	})
+    indexSetting.fs.exist({
+        path: 'fs://' + indexSetting.book_id + '_' + colum_id + '.txt'
+    }, function(ret, err) {
+        if (!ret.exist) {
+            down(colum_id,zhangjie,subject,price);
+        } else {
+            openwin('read', {
+                book_id: indexSetting.book_id,
+                book_name: indexSetting.book_name,
+                image: indexSetting.bookinfo.image,
+                desco: indexSetting.bookinfo.desco,
+                colum_id: colum_id,
+                zhangjie: zhangjie,
+                subject: subject
+        	});
+        	setTimeout(function(){
+        		toast.hide()
+        	},1000)
+        }
+    });
+}
+
+function tixinglogin() {
+    var dialog = new auiDialog({})
+    dialog.alert({
+        title: '请登录',
+        msg: '请登录后阅读！',
+        buttons: ['取消', '去登录']
+    }, function(ret) {
+        if (ret) {
+            if (ret.buttonIndex == 2) {
+                openwin('login', {
+                        from: "mulu",
+                        book_id: indexSetting.book_id
+                })
+            }
+        }
+    })
+}
+</script>
+</html>

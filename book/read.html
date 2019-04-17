@@ -1,0 +1,364 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    body {
+        background: #FFFfee;
+    }
+   #metainfo {position:fixed;bottom:0;left:0;right:0;clear:both;}
+   #metainfo > span{
+    display: inline-block;width:48%;overflow:hidden;white-space:nowrap;font-size:10px;color:#aaa;
+    text-overflow: ellipsis;
+  }
+   	#metainfo .z{float:left;margin-left: 3px;}
+   	#metainfo .y {float:right;text-align: right;margin-right: 3px;}
+    </style>
+</head>
+<body id="read">
+<div id="metainfo">
+	<span id="bookname" class="z"></span>
+	<span id="subject" class="y"></span>
+</div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-dialog.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.fontsize = 16;
+indexSetting.jiazai = 0;
+indexSetting.bg = ($api.getStorage('yejianmoshi') > 0) ? '#212121' : "#ffffee";
+indexSetting.color = ($api.getStorage('yejianmoshi') > 0) ? '#eee' : "#333";
+var thebook = {};
+apiready = function() {
+    autocheckyejian();
+    ajaxuser();
+    api.setFullScreen({
+        fullScreen: true
+    });
+    api.parseTapmode();
+    indexSetting.book_id = api.pageParam.book_id;
+    indexSetting.colum_id = api.pageParam.colum_id;
+    indexSetting.zhangjie = api.pageParam.zhangjie;
+    indexSetting.subject = api.pageParam.subject;
+    indexSetting.price = api.pageParam.price;
+    indexSetting.authorid = api.pageParam.authorid;
+    indexSetting.progress = api.pageParam.progress ? api.pageParam.progress : 0;
+    thebook.book_name = api.pageParam.book_name;
+    thebook.image = api.pageParam.image;
+    thebook.desco = api.pageParam.desco;
+    $api.text($api.byId("bookname"),' ['+thebook.book_name+']');
+    $api.text($api.byId("subject"),indexSetting.subject);
+    indexSetting.bookReader = api.require('bookReader');
+    ajaxhistory(indexSetting.colum_id, indexSetting.zhangjie, indexSetting.subject, indexSetting.price);
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+        	api.setFullScreen({
+                fullScreen: false
+            });
+            ajaxhistory(indexSetting.colum_id, indexSetting.zhangjie, indexSetting.subject, indexSetting.price);
+            api.execScript({
+	            name: 'mulu_'+indexSetting.book_id,
+	            script: "toast.hide()"
+	          });
+            api.execScript({
+	            name: 'root',
+              frameName:"store",
+	            script: "api.refreshHeaderLoading();"
+	          });
+            back();
+        }
+    });
+    indexSetting.fs       = api.require('fs');
+	 api.closeFrame({name:"readset"})
+    openbook(indexSetting.colum_id,indexSetting.subject,0,1);
+};
+function openbook(colum_id,subject,progress,init){
+	toast.loading({
+		title:"loading..."
+	});
+	$api.text($api.byId("subject"),subject);
+	//加载阅读器 start
+    var config = {
+        filePath: 'fs://' + indexSetting.book_id + '_' +colum_id + '.txt',
+        codingType: "utf8",
+        bg: indexSetting.bg,
+        h: api.winHeight-20,
+        y: 0,
+        animType: '',
+        progress:progress>0?progress:0,
+        textStyle: {
+            size: indexSetting.fontsize,
+            color: indexSetting.color
+        }
+    };
+    indexSetting.bookReader.open(config, function(ret, err) {
+        if (ret) {
+            toast.hide();
+            switch (ret.eventType) {
+                case 'click':
+                    toggleset();
+                    break;
+                case 'page_begin':
+                	if(indexSetting.jiazai < 1){
+                		toast.loading({
+							title:"loading..."
+						});
+                		getprev();
+                	}
+                    break;
+                case 'page_end':
+                	if(indexSetting.jiazai < 1){
+                		toast.loading({
+							title:"loading..."
+						});
+                	 	getnext();
+                	}
+                    break;
+                default:
+                    break;
+            }
+
+        } else {
+            toast.fail({
+            	title:err.msg,
+            	duration:2000
+            });
+        }
+
+    });
+    getnext(1);
+}
+function toggleset() {
+    api.openFrame({
+        name: 'readset',
+        url: './readset.html',
+        rect: {
+            x: 0,
+            y: 0,
+            w: api.winWidth,
+            h: api.winHeight
+        },
+        pageParam: {
+            book_id: indexSetting.book_id,
+            book_name: thebook.book_name,
+            image: thebook.image,
+            desco: thebook.desco,
+            colum_id: api.pageParam.colum_id,
+            zhangjie: api.pageParam.zhangjie,
+            subject: api.pageParam.subject,
+            price: api.pageParam.price,
+            authorid: api.pageParam.authorid,
+        },
+        bounces: false,
+        reload: true,
+        vScrollBarEnabled: false,
+        hScrollBarEnabled: false,
+        animation: {
+            type: "none",
+            subType: "from_right",
+            duration: 300
+        }
+    });
+}
+
+function ajaxhistory(colum_id, zhangjie, subject, price) {
+    var progress = 0;
+    indexSetting.bookReader.getProgress({
+        filePath: 'fs://' + indexSetting.book_id + '_' + colum_id + '.txt'
+    }, function(ret, err) {
+        if (ret.status) {
+            progress = ret.progress;
+        }
+        var history = $api.getStorage('history');
+        if (history) {
+            var isthebook = false;
+            for (var i = 0, len = history.data.length; i < len; i++) {
+                if (history.data[i].book_id == indexSetting.book_id) {
+                  isthebook = true;
+                    history.data[i].colum_id = colum_id;
+                    history.data[i].zhangjie = zhangjie;
+                    history.data[i].subject = subject;
+                    history.data[i].progress = progress;
+                    history.data[i].price = price;
+                }
+            }
+            $api.setStorage('history', history);
+        }
+        var newhistory = {};
+        newhistory.image = thebook.image;
+        newhistory.book_name = thebook.book_name;
+        newhistory.book_id = indexSetting.book_id;
+        newhistory.colums = 2;
+        newhistory.zhangjie = zhangjie;
+        newhistory.colum_id = colum_id;
+        newhistory.subject = subject;
+        newhistory.progress = progress;
+        newhistory.price = indexSetting.price;
+        if(!history || isthebook === false)
+         {
+           if(!history){
+             $api.setStorage('history', {
+               data: [newhistory]
+             });
+           }else{
+             history.data.push(newhistory);
+             $api.setStorage('history', history);
+           }
+        }
+    });
+
+}
+
+function getprev() {
+	indexSetting.jiazai = 1;
+    var userinfo = $api.getStorage('userinfo');
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=prevcolum&param=book_id----' + indexSetting.book_id + ',colum_id----' + indexSetting.colum_id + ',zhangjie----' + indexSetting.zhangjie + ',bbsuid----' + userinfo.bbsuid,
+        method: 'get'
+    }, function(ret, err) {
+    	indexSetting.jiazai = 0;
+        if (!ret || !ret.data || !ret.data.colum_id) {
+            toast.fail({
+                title: '已是第一页',
+                duration: 2000
+            });
+        } else if(ret && ret.data && ret.data.colum_id){
+            // 下载上一章
+            down(indexSetting.book_id, ret.data.colum_id, ret.data.zhangjie, ret.data.subject, ret.data.price, ret.data.kedu, ret.data.uid,100);
+        }else{
+        	toast.fail({
+                title: '已是第一页',
+                duration: 2000
+            });
+        }
+    });
+}
+
+function getnext(silent) {
+	indexSetting.jiazai = 1;
+    var userinfo = $api.getStorage('userinfo');
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=nextcolum&param=book_id----' + indexSetting.book_id + ',colum_id----' + indexSetting.colum_id + ',zhangjie----' + indexSetting.zhangjie + ',bbsuid----' + userinfo.bbsuid,
+        method: 'get'
+    }, function(ret, err) {
+    	setTimeout(function(){
+    			indexSetting.jiazai = 0;
+    		},500);
+        if (!ret || !ret.data || ret.data.colum_id<1) {
+        	if(silent !== 1){
+            toast.fail({
+                title: '已是最后一页',
+                duration: 2000
+            });
+            }
+        } else if(ret && ret.data && ret.data.colum_id>0){
+            // 下载下一章
+            down(indexSetting.book_id, ret.data.colum_id, ret.data.zhangjie, ret.data.subject, ret.data.price, ret.data.kedu, ret.data.uid,0,silent);
+        }else{
+        	if(silent !== 1){
+	        	toast.fail({
+	                title: '已是最后一页',
+	                duration: 2000
+	            });
+            }
+        }
+    });
+
+}
+
+function down(book_id, colum_id, zhangjie, subject, price, kedu, authorid,progress,silent) {
+    if(silent !== 1){
+        indexSetting.colum_id = colum_id;
+        indexSetting.zhangjie = zhangjie;
+        indexSetting.subject = subject;
+        indexSetting.price = price;
+        ajaxhistory(colum_id, zhangjie, subject, price);
+    }
+    indexSetting.fs.exist({
+        path: 'fs://' + book_id + '_' + colum_id + '.txt'
+    }, function(retes, erres) {
+    	if(!retes.exist) {
+    		// start
+		    var userinfo = $api.getStorage('userinfo');
+		    var filepath = 'fs://' + book_id + '_' + colum_id + '.txt';
+		    api.ajax({
+			    url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=bookstr&param=book_id----' + book_id + ',colum_id----' + colum_id,
+			    method: 'get',
+			    dataType:"text",
+			    timeout:60
+			  }, function(ret, err) {
+			    if (ret) {
+			        indexSetting.fs.createFile({
+					    path: filepath
+					}, function(ret0, err0) {
+					    if (ret0.status) {
+							indexSetting.fs.open({
+							    path: filepath,
+							    flags: 'read_write'
+							}, function(retd, errd) {
+							    if (retd.status) {
+							        indexSetting.fs.write({
+									    fd: retd.fd,
+									    data:ret
+									}, function(ret2, err2) {
+									    if (ret2.status) {
+									    	// 下载成功，进行打开
+									    	if(silent !== 1){
+									    		openbook(colum_id,subject,progress);
+									    	}
+									    } else {
+									    	if(silent !== 1){
+										    	toast.fail({
+									                title: '下载失败,errorcode=6',
+									                duration: 2000
+									            });
+								            }
+									    }
+									});
+							    } else {
+							    	if(silent !== 1){
+								    	toast.fail({
+							            	title:'下载失败,'+errd.msg,
+							            	duration:2000
+							            })
+						            }
+							    }
+							});
+					    } else {
+						    if(silent !== 1){
+						    	toast.fail({
+							        title:'下载失败,'+err0.msg,
+							        duration:2000
+							    })
+						    }
+					    }
+					});
+			    } else {
+			    	if(silent !== 1){
+				    	toast.fail({
+			                title: '没有了',
+			                duration: 2000
+			            });
+		            }
+			    }
+			});
+             //end
+        }else{
+        	if(silent !== 1){
+        		openbook(colum_id,subject,progress);
+        	}
+        }
+    });
+}
+</script>
+</html>

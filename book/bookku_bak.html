@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    .aui-row .aui-col-xs-4:nth-child(3n) {
+        border-left: 1px solid #f1f1f1;
+        margin-left: -1px;
+    }
+    .aui-tab-item {
+        border-bottom: 1px solid #e6e6e6;
+        background: transparent;
+    }
+    .aui-row .aui-col-xs-4 .content-padded {
+        color: #999;
+    }
+    .aui-row .aui-col-xs-4 {
+        background: transparent;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    .aui-row .aui-col-xs-4:nth-child(3n-1) {
+        border-left: 1px solid #f1f1f1;
+        margin-left: -1px;
+    }
+    #top-left{z-index: -2;}
+    #top-left.aui-popup-in{z-index: 9999;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav " id="header">
+        <a class="aui-pull-left aui-btn aui-btn-primary"   aui-popup-for="top-left" tapmode>
+            <span class="fa fa-fw fa-navicon" aui-popup-for="top-left" tapmode></span>
+        </a>
+        <div class="aui-title">书库</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main"></div>
+    <div class="aui-popup aui-popup-top-left" id="top-left" style="top:2.5rem">
+        <div class="aui-popup-arrow"></div>
+        <div class="aui-popup-content">
+            <ul class="aui-list aui-list-noborder">
+                <li class="aui-list-item" tapmode onclick="openslide()">
+                    <div class="aui-list-item-label-icon">
+                        <i class="aui-iconfont aui-icon-my aui-text-warning"></i>
+                    </div>
+                    <div class="aui-list-item-inner aui-list-item-middle">
+                        会员中心
+                    </div>
+                </li>
+                <li class="aui-list-item" tapmode onclick="erweima()">
+                    <div class="aui-list-item-label-icon">
+                        <i class="fa fa-fw fa-qrcode aui-text-info"></i>
+                    </div>
+                    <div class="aui-list-item-inner">
+                        扫一扫
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script type="text/x-dot-template" id="main-temp">
+        <div class="aui-info aui-margin-t-5 aui-padded-l-10 aui-padded-r-10">
+            <div class="aui-info-item" id="bookkuinfo">
+                <span class="aui-iconfont aui-icon-info"></span> &nbsp;共有图书&nbsp;
+                <span class="aui-text-danger "> {{=it.nums.booknums}} </span> &nbsp;册，本周新增&nbsp;
+                <span class="aui-text-danger"> {{=it.nums.weeknums}} </span>&nbsp;册
+            </div>
+        </div>
+        {{? it.categorys}}
+          {{ for(var i=0,len=it.categorys.length;i<len;i++) { }}
+            <div class="aui-tab">
+              <div class="aui-tab-item aui-active aui-text-left aui-padded-l-10">{{=it.categorys[i].category_name}}</div>
+            </div>
+            <section class="aui-grid aui-margin-b-10">
+                <div class="aui-row">
+                  {{ for(var j=0,jlen=it.categorys[i].sub.length;j<jlen;j++) { }}
+                    <div class="aui-col-xs-4" tapmode onclick="opencategory({{=it.categorys[i].sub[j].category_id}},'{{=it.categorys[i].sub[j].category_name}}')">
+                        <div class="aui-grid-label aui-font-size-14">{{=it.categorys[i].sub[j].category_name}}</div>
+                        <div class="aui-ellipsis-1 content-padded aui-font-size-12">共{{=it.categorys[i].sub[j].nums}}册/新增{{=it.categorys[i].sub[j].weeknums}}</div>
+                    </div>
+                  {{ } }}
+                </div>
+            </section>
+          {{ } }}
+        {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/aui-popup.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+var popup = new auiPopup();
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    initload();
+};
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=bookku',
+        method: 'get'
+    }, function(ret, err) {
+        if (ret && ret.status) {
+            var temp = $api.text($api.byId("main-temp"));
+            var dottemp = doT.template(temp);
+            var html = dottemp(ret);
+            $api.html($api.byId('main'), html);
+            toast.hide();
+      } else {
+            toast.fail({
+                title: ret.error,
+                duration: 2000
+            });
+        }
+    });
+}
+//打开分类
+function opencategory(category_id, category_name) {
+    openwin('category', {
+            category_id: category_id,
+            category_name: category_name
+        })
+}
+
+function openslide() {
+    var islogin = 0;
+    var url = 'login';
+    if (indexSetting.userinfo && indexSetting.userinfo.uid>1) {
+        // 已登录进入会员详细信息
+        islogin = 1;
+        url = 'userinfo';
+    }
+    openwin(url, {
+            from: "root",
+            islogin: islogin
+    })
+}
+</script>
+</html>

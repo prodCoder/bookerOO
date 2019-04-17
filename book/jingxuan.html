@@ -1,0 +1,376 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/aui-slide.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #mainlist {
+        padding-bottom: 50px
+    }
+    #loading {
+      margin-bottom: 30px;
+    }
+    #main .aui-ellipsis-1 {
+        display: inline-block;
+        width: 95%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    #aui-slide{max-height: 140px;height: 140px;overflow: hidden;}
+    .h1-title{margin:0;color: #242424;font-size: 0.85rem;padding-top: 8px;padding-bottom: 5px;}
+    #top-left{z-index: -2;}
+    #top-left.aui-popup-in{z-index: 9999;}
+    .aui-tab-item{border-bottom: 1px solid #f1f1f1;}
+    </style>
+</head>
+<body>
+    <div id="main" class="aui-content"></div>
+    <script id="main-temp" type="text/x-dot-template">
+      {{? it.flash && it.flash.images && it.flash.images.length}}
+      <div id="aui-slide" class="">
+        <div class="aui-slide-wrap">
+            {{ for(var i=0,len=it.flash.images.length;i<len;i++) { }}
+            <div class="aui-slide-node bg-dark" tapmode onclick="openwebpage('{{? /^http/.test(it.flash.url[i])}}{{=it.flash.url[i]}}{{??}}{{=it.flash.url[i]}}../{{=it.flash.url[i]}}{{?}}','{{=it.flash.title[i]}}')">
+              <img src="{{? /^http/.test(it.flash.images[i])}}{{=it.flash.images[i]}}{{??}}{{=indexSetting.url}}../{{=it.flash.images[i]}}{{?}}" />
+            </div>
+            {{ } }}
+        </div>
+        <div class="aui-slide-page-wrap aui-hide"></div>
+      </div>
+      {{?}}
+      <section class="aui-grid aui-margin-t-0">
+        <div class="aui-row">
+            <div class="aui-col-xs-3 aui-padded-t-5 aui-padded-b-5" tapmode onclick="openwin('paihang')">
+                <i class="fa fa-trophy fa-lg fa-fw aui-text-danger"></i>
+                <div class="aui-grid-label">排行</div>
+            </div>
+            <div class="aui-col-xs-3 aui-padded-t-5 aui-padded-b-5" tapmode onclick="openwin('wanben')">
+                <i class="fa fa-bookmark fa-lg fa-fw aui-text-warning"></i>
+                <div class="aui-grid-label">完本</div>
+            </div>
+            <div class="aui-col-xs-3 aui-padded-t-5 aui-padded-b-5" tapmode onclick="openwin('gengxin')">
+              <i class="fa fa-calculator fa-lg fa-fw aui-text-success"></i>
+                <div class="aui-grid-label">更新</div>
+            </div>
+            <div class="aui-col-xs-3 aui-padded-t-5 aui-padded-b-5" tapmode onclick="openwin('jilu')">
+              <i class="fa fa-clock-o fa-lg fa-fw aui-text-warning"></i>
+                <div class="aui-grid-label">记录</div>
+            </div>
+        </div>
+      </section>
+      {{? it.tjbook || it.yuedubang}}
+      <div class="aui-tab aui-margin-t-5 " id="auitab">
+        <div class="aui-tab-item aui-active aui-margin-l-10" id="jingxuantuijian">精选推荐</div>
+        <div class="aui-tab-item aui-margin-r-10" id="dajiadouzaikan">大家都在看</div>
+      </div>
+        <ul id="jingxuantuijian-menu" class="aui-tab-menu aui-list aui-media-list aui-margin-t-0 aui-list-noborder">
+        {{? it.tjbook}}
+          {{ for(var i=0,len=it.tjbook.length;i<len;i++) { }}
+          <li class="aui-list-item aui-margin-t-0 aui-margin-b-0">
+              <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.tjbook[i].book_id}})">
+                  <div class="aui-list-item-media">
+                      <img src="{{? it.tjbook[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.tjbook[i].image}}{{??}}../image/book.png{{?}}">
+                  </div>
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-text">
+                          <div class="aui-list-item-title aui-ellipsis-1">
+                              {{=it.tjbook[i].book_name}}
+                          </div>
+                      </div>
+                      <div class="aui-list-item-text">
+                          {{=it.tjbook[i].desco || '暂无图书描述'}}
+                      </div>
+                      <div class="aui-info aui-margin-t-10" style="">
+                          <div class="aui-info-item">
+                              <img src="{{? it.tjbook[i].avatar}}{{=it.tjbook[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                              <span class="aui-margin-l-5">{{=it.tjbook[i].author}}</span>
+                          </div>
+                          <div class="aui-info-item">
+                              <span class="">已更新{{=it.tjbook[i].colums}}章</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </li>
+          {{ } }}
+        {{??}}
+          <li class="aui-list-item">
+            暂无推荐图书
+          </li>
+        {{?}}
+        </ul>
+
+        <ul id="dajiadouzaikan-menu" class="aui-tab-menu aui-hide aui-list aui-media-list aui-margin-t-0 aui-list-noborder">
+        {{? it.yuedubang}}
+          {{ for(var i=0,len=it.yuedubang.length;i<len;i++) { }}
+          <li class="aui-list-item aui-margin-t-0 aui-margin-b-0">
+              <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.yuedubang[i].book_id}})">
+                  <div class="aui-list-item-media">
+                      <img src="{{? it.yuedubang[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.yuedubang[i].image}}{{??}}../image/book.png{{?}}">
+                  </div>
+                  <div class="aui-list-item-inner">
+                      <div class="aui-list-item-text">
+                          <div class="aui-list-item-title aui-ellipsis-1">
+                              {{=it.yuedubang[i].book_name}}
+                          </div>
+                      </div>
+                      <div class="aui-list-item-text">
+                          {{=it.yuedubang[i].desco || '暂无图书描述'}}
+                      </div>
+                      <div class="aui-info aui-margin-t-10" style="">
+                          <div class="aui-info-item">
+                              <img src="{{? it.yuedubang[i].avatar}}{{=it.yuedubang[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                              <span class="aui-margin-l-5">{{=it.yuedubang[i].author}}</span>
+                          </div>
+                          <div class="aui-info-item">
+                              <span class="">已更新{{=it.yuedubang[i].colums}}章</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </li>
+          {{ } }}
+        {{??}}
+          <li class="aui-list-item">
+            还没有记录哦！
+          </li>
+        {{?}}
+        </ul>
+      {{?}}
+
+      {{? it.databook}}
+        <ul class="aui-list aui-media-list aui-margin-t-5 aui-list-noborder" id="indexlist">
+            <li class="aui-list-item aui-margin-b-0">
+              <h1 class="h1-title aui-margin-t-5">新书上架</h1>
+            </li>
+            {{ for(var i=0,len=it.databook.length;i<len;i++) { }}
+            <li class="aui-list-item aui-margin-t-0 aui-margin-b-0">
+                <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.databook[i].book_id}})">
+                    <div class="aui-list-item-media">
+                        <img src="{{? it.databook[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.databook[i].image}}{{??}}../image/book.png{{?}}">
+                    </div>
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-text">
+                            <div class="aui-list-item-title aui-ellipsis-1">
+                                {{=it.databook[i].book_name}}
+                            </div>
+                        </div>
+                        <div class="aui-list-item-text">
+                            {{=it.databook[i].desco || '暂无图书描述'}}
+                        </div>
+                        <div class="aui-info aui-margin-t-10" style="">
+                            <div class="aui-info-item">
+                                <img src="{{? it.databook[i].avatar}}{{=it.databook[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                                <span class="aui-margin-l-5">{{=it.databook[i].author}}</span>
+                            </div>
+                            <div class="aui-info-item">
+                                <span class="">已更新{{=it.databook[i].colums}}章</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {{ } }}
+        </ul>
+        {{?}}
+        <div id="loading" class="aui-text-center">
+          <span class=" fa fa-spinner fa-spin fa-2x"></span>
+        </div>
+    </script>
+    <script type="text/x-dot-template" id="indexlist-temp">
+      {{? it.databook}}
+        {{ for(var i=0,len=it.databook.length;i<len;i++) { }}
+        <li class="aui-list-item ">
+            <div class="aui-media-list-item-inner" tapmode onclick="openbook({{=it.databook[i].book_id}})">
+                <div class="aui-list-item-media">
+                    <img src="{{? it.databook[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.databook[i].image}}{{??}}../image/book.png{{?}}">
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title aui-ellipsis-1">
+                            {{=it.databook[i].book_name}}
+                        </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                        {{=it.databook[i].desco || '暂无图书描述'}}
+                    </div>
+                    <div class="aui-info aui-margin-t-10" style="">
+                        <div class="aui-info-item">
+                            <img src="{{? it.databook[i].avatar}}{{=it.databook[i].avatar}}{{??}}../image/liulangnan.png{{?}}" style="width:0.6rem" class="aui-img-round" />
+                            <span class="aui-margin-l-5">{{=it.databook[i].author}}</span>
+                        </div>
+                        <div class="aui-info-item">
+                            <span class="">已更新{{=it.databook[i].colums}}章</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </li>
+        {{ } }}
+        {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/aui-tab.js"></script>
+<script type="text/javascript" src="../script/aui-scroll.js"></script>
+<script type="text/javascript" src="../script/aui-slide.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+// toast.loading({
+//     title:"loading...",
+//     duration:2000
+// })
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.loading = false;
+indexSetting.current = 1;
+indexSetting.total = 2;
+indexSetting.startindex = 0;
+if ($api.getStorage('localstore')) {
+    indexSetting.localstore = $api.getStorage('localstore');
+} else {
+    indexSetting.localstore = {
+        data: []
+    };
+}
+apiready = function() {
+  autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    if (api.statusBarAppearance) {
+        if (api.systemType == 'android') {
+            indexSetting.statbar = 25;
+        } else {
+            indexSetting.statbar = 20;
+        }
+        api.setStatusBarStyle({
+            style: 'dark'
+        });
+    } else {
+        indexSetting.statbar = 0;
+    }
+    initload();
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        ajaxuser();
+        setTimeout(function() {
+            indexSetting.uerinfo = $api.getStorage('userinfo');
+        }, 1000);
+        initload();
+        api.refreshHeaderLoadDone()
+    });
+
+    //  无限加载
+    var scroll = new auiScroll({
+        listen: true,
+        distance: 20
+    }, function(ret) {
+        if (ret.isToBottom && !indexSetting.loading) {
+            indexSetting.loading = true;
+            $api.removeCls($api.byId('loading'), 'aui-hide');
+            api.ajax({
+                url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=jingxuan&param=current----' + indexSetting.current,
+                method: 'get'
+            }, function(ret, err) {
+                if (ret) {
+                    if (ret.status && (indexSetting.total >= indexSetting.current)) {
+                        indexSetting.current += 1;
+                        indexSetting.total = ret.total;
+                        var temp = $api.text($api.byId("indexlist-temp"));
+                        var dottemp = doT.template(temp);
+                        var html = dottemp(ret);
+                        $api.append($api.byId('indexlist'), html);
+                        $api.addCls($api.byId('loading'), 'aui-hide');
+                    } else {
+                        $api.html($api.byId('loading'), '没有了');
+                    }
+                } else {
+                    toast.fail({
+                        title: err.msg,
+                        duration: 2000
+                    });
+                }
+            });
+        }
+        indexSetting.loading = false;
+    });
+}
+
+function openslide() {
+    var islogin = 0;
+    var url = 'login';
+    var userinfo = $api.getStorage('userinfo');
+    if (userinfo.uid) {
+        // 已登录进入会员详细信息
+        islogin = 1;
+        url = 'userinfo';
+    }
+    openwin(url, {
+        from: "root",
+        islogin: islogin
+    })
+}
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=index',
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            indexSetting.current = 1;
+            indexSetting.total = 2;
+            $api.setStorage('jingxuan', {
+                cache: ret,
+                time: (new Date().getTime())
+            });
+            var temp = $api.text($api.byId("main-temp"));
+            var dottemp = doT.template(temp);
+            var html = dottemp(ret);
+            $api.html($api.byId('main'), html);
+            var slide = new auiSlide({
+                container: document.getElementById("aui-slide"),
+                "height": 180,
+                "speed": 500,
+                "autoPlay": 5000,
+                "loop": true,
+                "pageShow": true,
+            });
+            var tab = new auiTab({
+                element: document.getElementById("auitab"),
+                index: 1,
+                repeatClick: false
+            }, function(ret2) {
+                var id = $api.attr(ret2.dom, 'id');
+                var domall = $api.domAll(".aui-tab-menu");
+                if (domall) {
+                    for (var i = 0, len = domall.length; i < len; i++) {
+                        $api.addCls(domall[i], 'aui-hide');
+                    }
+                    $api.removeCls($api.byId(id + '-menu'), 'aui-hide')
+                }
+            });
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+</script>
+</html>

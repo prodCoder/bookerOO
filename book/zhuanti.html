@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    .aui-card-list-content img {
+        display: block;
+        width: 98%;
+        margin: auto;
+    }
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn" tapmode onclick="back()">
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+        <div class="aui-title">专题</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main"></div>
+    <script id="main-temp" type="text/x-dot-template">
+      {{? it.data}}
+        {{for (var i=0,len=it.data.length;i<len;i++) { }}
+        <div class="aui-card-list aui-margin-b-5" tapmode onclick="zhuanti({{=it.data[i].topic_id}},'{{=it.data[i].name}}')">
+            <div class="aui-card-list-header">
+                {{=it.data[i].name}}
+            </div>
+            <div class="aui-card-list-content aui-text-center">
+                <img src="{{? /^http/.test(it.data[i].image)}}{{=it.data[i].image}}{{??}}{{=indexSetting.url}}../{{=it.data[i].image}}{{?}}" />
+            </div>
+            <div class="aui-card-list-footer">
+                {{=it.data[i].descro}}
+            </div>
+        </div>
+        {{ } }}
+      {{??}}
+        <h1 class="aui-text-center aui-text-danger">暂无专题</h1>
+      {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+    api.parseTapmode();
+    $api.fixStatusBar($api.dom('header'));
+    autocheckyejian();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    initload();
+};
+//  初始化
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=zhuanti',
+        method: 'get'
+    }, function(ret, err) {
+        if (ret) {
+            var temp = $api.text($api.byId("main-temp"));
+            var dottemp = doT.template(temp);
+            var html = dottemp(ret);
+            $api.html($api.byId('main'), html);
+            toast.hide();
+        } else {
+            toast.fail({
+                title: err.msg,
+                duration: 2000
+            });
+        }
+    });
+}
+
+function zhuanti(id, name) {
+    openwin('zhuantiinfo', {
+            topic_id: id,
+            name: name
+        })
+}
+</script>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav transparent" id="header">
+        <a class="aui-pull-left aui-btn" onclick="back()">
+            <i class="aui-iconfont aui-icon-left"></i>
+        </a>
+        <div class="aui-title" id="title">关于我们</div>
+    </header>
+    <div id="main">
+        <div class="aui-content-padded" id="maincontent"></div>
+        <div id="loading" class="aui-text-center aui-font-size-14 aui-margin-t-15" style="margin-top: 4rem;"><span class=" fa fa-spinner fa-spin fa-3x"></span></div>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+apiready = function() {
+	autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    initload();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+};
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=about',
+        method: 'get'
+    }, function(ret, err) {
+        if (ret && ret.status) {
+            $api.addCls($api.byId('loading'), 'aui-hide');
+            $api.html($api.byId('maincontent'), ret.content);
+        } else {
+            $api.text($api.byId('loading'), '没有内容');
+        }
+
+    });
+}
+</script>
+</html>

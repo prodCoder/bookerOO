@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget id="A6008680768768" version="0.0.1">
+  <name>书友圈</name>
+  <description/>
+  <author email="2867557054@qq.com" href="http://addon.discuz.com/?@58212.developer">西风工作室</author>
+  <content src="index.html"/>
+  <preference name="pageBounce" value="false"/>
+  <preference name="appBackground" value="#ffffff"/>
+  <preference name="hScrollBarEnabled" value="false"/>
+  <preference name="vScrollBarEnabled" value="true"/>
+  <preference name="autoLaunch" value="true"/>
+  <preference name="fullScreen" value="false"/>
+  <preference name="autoUpdate" value="true"/>
+  <preference name="smartUpdate" value="true"/>
+  <preference name="debug" value="true"/>
+  <preference name="iOS7StatusBarAppearance" value="true"/>
+  <preference name="statusBarAppearance" value="true"/>
+  <preference name="softInputMode" value="resize"/>
+  <preference name="backgroundMode" value="audio"/>
+  <preference name="checkSslTrusted" value="false"/>
+  <permission name="readPhoneState"/>
+  <preference name="urlScheme" value="jamesonreadapp"/>
+  <preference name="querySchemes" value="jamesonreadapp"/>
+  <preference name="checkSslTrusted" value="false" />
+  <preference name="appCertificateVerify" value="false" />
+  <access origin="*"/>
+  <feature name="qq">
+    <param name="urlScheme" value="tencent1105596557"/>
+    <param name="apiKey" value="1105596557"/>
+  </feature>
+  <feature name="smsVerify">
+    <param name="android_app_key" value="169aa091179f3"/>
+    <param name="android_app_secret" value="5c8d14b5601bb21209f04fff8542a791"/>
+  </feature>
+</widget>

@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+        .imgwrap{height: 150px;overflow: hidden;background: #fff;border:1px solid #f1f1f1;text-align: center;}
+        .imgwrap img{display: block;margin:auto;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav transparent" id="header">
+        <a class="aui-pull-left aui-btn" onclick="back()">取消</a>
+        <div class="aui-title">编辑书架</div>
+        <a class="aui-pull-right aui-btn" onclick="operation(this)" id="end">完成</a>
+    </header>
+    <div id="main"></div>
+    <script type="text/x-dot-template" id="main-temp">
+      {{? it.bookstore && it.bookstore.data && it.bookstore.data.length}}
+        <div class="aui-row">
+          {{ for (var i=0,len=it.bookstore.data.length;i<len;i++) { }}
+            <div id="book_id_{{=it.bookstore.data[i].book_id}}" tapmode onclick="select({{=it.bookstore.data[i].book_id}})" class="aui-col-xs-4 aui-text-center aui-margin-t-10">
+                <div class="aui-text-center imgwrap aui-margin-t-10">
+                    <img src="{{? it.bookstore.data[i].image}}{{=indexSetting.url}}../data/attachment/forum/{{=it.bookstore.data[i].image}}{{??}}../image/book.png{{?}}" style="width:100%;">
+                </div>
+                <div class="aui-list-item-title aui-ellipsis-1">{{=it.bookstore.data[i].book_name}}</div>
+                <div class="aui-text-center aui-margin-b-5">
+                    <label>
+                        <input class="aui-checkbox" type="checkbox" name="checkbox" id="check_{{=it.bookstore.data[i].book_id}}"> </label>
+                </div>
+            </div>
+          {{ } }}
+        </div>
+    {{??}}
+        <h1 class="aui-text-center aui-text-center">书架中暂无图书</h1>
+    {{?}}
+    </script>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/dot.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({})
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.ids = new Array();
+if ($api.getStorage('localstore')) {
+    indexSetting.localstore = ($api.getStorage('localstore'));
+} else {
+    indexSetting.localstore = {
+        data: []
+    };
+}
+var userinfo = indexSetting.userinfo;
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            back();
+        }
+    });
+    initload();
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+//  初始化
+function initload() {
+    if (userinfo.bbsuid) {
+        api.ajax({
+            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=store&param=bbsuid----' + userinfo.bbsuid,
+            method: 'get'
+        }, function(ret, err) {
+            if (ret) {
+                if (ret.status) {
+                    var temp = $api.text($api.byId("main-temp"));
+                    var dottemp = doT.template(temp);
+                    var html = dottemp(ret);
+                    $api.html($api.byId('main'), html);
+                    toast.hide();
+                } else {
+                    toast.fail({
+                        title: ret.error,
+                        duration: 2000
+                    });
+                }
+            } else {
+                toast.fail({
+                    title: err.msg,
+                    duration: 2000
+                });
+            }
+        });
+    } else {
+        var ret = {};
+        ret.bookstore = indexSetting.localstore;
+        var temp = $api.text($api.byId("main-temp"));
+        var dottemp = doT.template(temp);
+        var html = dottemp(ret);
+        $api.html($api.byId('main'), html);
+        toast.hide();
+    }
+}
+
+function select(book_id) {
+    var index;
+    if ($api.attr($api.byId('check_' + book_id), 'checked')) {
+        // 删除
+        $api.removeAttr($api.byId('check_' + book_id), 'checked');
+        if ((index = indexSetting.ids.indexOf(book_id)) !== -1) {
+            indexSetting.ids.splice(index, 1);
+        }
+    } else {
+        // 增加
+        $api.attr($api.byId('check_' + book_id), 'checked', 'checked');
+        if ((index = indexSetting.ids.indexOf(book_id)) === -1) {
+            indexSetting.ids.push(book_id);
+        }
+    }
+    // 有选择则显示删除，否则不显示
+    if (indexSetting.ids.length) {
+        $api.text($api.byId('end'), '删除');
+    } else {
+        $api.text($api.byId('end'), '');
+    }
+}
+
+function IsContain(arr, value) {
+    for (var i = 0; i < arr.length; i++) {
+        if (arr[i] == value)
+            return true;
+    }
+    return false;
+}
+
+function operation(tag) {
+    // 待连接服务器同步
+    if (indexSetting.ids.length) {
+        // ajax操作删除书架图书
+        for (var i = 0, len = indexSetting.ids.length; i < len; i++) {
+            $api.remove($api.byId('book_id_' + indexSetting.ids[i]));
+        }
+        if (indexSetting.localstore && $api.isArray(indexSetting.localstore.data)) {
+            for (var j = 0, jlen = indexSetting.localstore.data.length; j < jlen; j++) {
+                if (indexSetting.localstore.data[j]) {
+                    if (IsContain(indexSetting.ids, indexSetting.localstore.data[j].book_id)) {
+                        indexSetting.localstore.data.splice(j, 1);
+                    }
+                }
+            }
+            $api.setStorage('localstore', indexSetting.localstore);
+        }
+        if (userinfo.bbsuid) {
+            var bookids = indexSetting.ids.join('##');
+            api.ajax({
+                url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=delstore&param=book_id----' + bookids + ',bbsuid----' + userinfo.bbsuid,
+                method: 'get'
+            }, function(ret, err) {
+                if (ret) {}
+            });
+        }
+        indexSetting.ids = [];
+        $api.text(tag, '完成');
+        toast.fail({
+            title: '已删除',
+            duration: 2000
+        });
+        api.execScript({
+            name: 'root',
+            frameName: 'store',
+            script: 'api.refreshHeaderLoading()'
+        });
+    } else {
+        back();
+    }
+}
+</script>
+</html>

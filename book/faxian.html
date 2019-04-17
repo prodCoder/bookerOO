@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    #top-left{z-index: -2;}
+    #top-left.aui-popup-in{z-index: 9999;}
+    </style>
+</head>
+<body>
+    <header class="aui-bar aui-bar-nav" id="header">
+        <a class="aui-pull-left aui-btn aui-btn-primary" aui-popup-for="top-left" tapmode>
+            <span class="fa fa-fw fa-navicon"></span>
+        </a>
+        <div class="aui-title">发现</div>
+        <a class="aui-pull-right aui-btn" tapmode onclick="opensearch()">
+            <span class="aui-iconfont aui-icon-search"></span>
+        </a>
+    </header>
+    <div id="main" class="">
+        <ul class="aui-list aui-list-in">
+            <li class="aui-list-item" tapmode onclick="openwin('paihang')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-trophy fa-lg fa-fw aui-text-danger"></i>排行榜</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">排行榜数据</div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwin('spgc')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-language fa-lg fa-fw aui-text-primary"></i>书评广场</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">大神驾到</div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwin('zhuanti')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-list-alt fa-lg fa-fw aui-text-success"></i>专题</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">为你盘点热门</div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwin('authorlist')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-user fa-lg fa-fw aui-text-primary"></i>名人堂</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">名人名作值得读哦</div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwin('update')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-warning fa-lg fa-fw aui-text-warning"></i>检测新版</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default"><span class="fa" id="hasupdate">升级到最新版</span></div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwebpage('http://112.74.48.36:8080/novel/plugin.php?id=jameson_read&contrl=touch','西风工作室')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-cloud fa-lg fa-fw aui-text-primary"></i>打开官网</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default">demo.xf512.com</div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item" tapmode onclick="openwin('about')">
+                <div class="aui-list-item-inner aui-list-item-arrow">
+                    <div class="aui-list-item-title"><i class="fa fa-info fa-lg fa-fw aui-text-danger"></i>关于我们</div>
+                    <div class="aui-list-item-right">
+                        <div class="aui-text-default"></div>
+                    </div>
+                </div>
+            </li>
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                        夜间模式
+                    </div>
+                    <div class="aui-list-item-right">
+                        <input tapmode onclick="setskin(this.checked)" id="yejianmoshi" type="checkbox" class="aui-switch">
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="aui-popup aui-popup-top-left" id="top-left" style="top:2rem">
+        <div class="aui-popup-arrow"></div>
+        <div class="aui-popup-content">
+            <ul class="aui-list aui-list-noborder">
+                <li class="aui-list-item" tapmode onclick="openslide()">
+                    <div class="aui-list-item-label-icon">
+                        <i class="aui-iconfont aui-icon-my aui-text-warning"></i>
+                    </div>
+                    <div class="aui-list-item-inner aui-list-item-middle">
+                        会员中心
+                    </div>
+                </li>
+                <li class="aui-list-item" tapmode onclick="erweima()">
+                    <div class="aui-list-item-label-icon">
+                        <i class="fa fa-fw fa-qrcode aui-text-info"></i>
+                    </div>
+                    <div class="aui-list-item-inner">
+                        扫一扫
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-popup.js"></script>
+<script type="text/javascript">
+var indexSetting = $api.getStorage('appinfo');
+var popup = new auiPopup();
+indexSetting.userinfo = $api.getStorage('userinfo');
+if ($api.getStorage('yejianmoshi') == '1') {
+    $api.attr($api.byId('yejianmoshi'), 'checked', 'checked');
+} else {
+    $api.removeAttr($api.byId('yejianmoshi'), 'checked');
+}
+
+function setskin(em) {
+    if (em) {
+        $api.setStorage('yejianmoshi', '0');
+        api.execScript({
+            name: 'root',
+            script: "$api.removeCls($api.byId('footer'),'qiehuan');"
+        });
+    } else {
+        // false 但 是 选中
+        $api.setStorage('yejianmoshi', '1');
+        api.execScript({
+            name: 'root',
+            script: "$api.addCls($api.byId('footer'),'qiehuan');"
+        });
+    }
+    autocheckyejian();
+    api.execScript({
+        name: 'root',
+        frameName: 'store',
+        script: "autocheckyejian();"
+    });
+    api.execScript({
+        name: 'root',
+        frameName: 'jingxuan',
+        script: "autocheckyejian();"
+    });
+    api.execScript({
+        name: 'root',
+        frameName: 'bookku',
+        script: "autocheckyejian();"
+    });
+}
+apiready = function() {
+    autocheckyejian();
+    $api.fixStatusBar($api.dom('header'));
+    api.parseTapmode();
+    indexSetting.oldversion = api.appVersion;
+    api.setRefreshHeaderInfo({
+        visible: true,
+        bgColor: '#ccc',
+        textColor: '#fff',
+        textDown: '下拉刷新...',
+        textUp: '松开刷新...',
+        showTime: true
+    }, function(ret, err) {
+        initload();
+        api.refreshHeaderLoadDone();
+    });
+};
+
+function initload() {
+    api.ajax({
+        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=updateversion&param=version----' + indexSetting.oldversion,
+        method: 'get'
+    }, function(ret, err) {
+        if (ret.status) {
+            $api.addCls($api.byId('hasupdate'), 'fa-circle');
+            $api.addCls($api.byId('hasupdate'), 'aui-text-danger');
+        }
+    });
+}
+
+function openslide() {
+    var islogin = 0;
+    var url = 'login';
+    if (indexSetting.userinfo && indexSetting.userinfo.uid>1) {
+        // 已登录进入会员详细信息
+        islogin = 1;
+        url = 'userinfo';
+    }
+    openwin(url, {
+            from: "root",
+            islogin: islogin
+        })
+}
+</script>
+</html>

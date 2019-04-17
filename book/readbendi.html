@@ -1,0 +1,425 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
+    <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <style type="text/css">
+    body{background:#ffffee;}
+    #header,
+    #footer {
+        border: 0;
+        position: fixed;
+        left: 0;
+        right: 0;
+        background: #000;
+        color: #fff;
+        z-index: 99;
+    }
+    #header .aui-iconfont {
+        top: -0.3rem;
+    }
+
+    #footer .aui-bar-tab-label {
+        bottom: -0.3rem;
+    }
+
+    #header_top,
+    #footer_bottom {
+        position: fixed;
+        left: 0;
+        right: 0;
+        background: transparent;
+        height: 50px;
+        line-height: 50px;
+        font-size: 0.6rem;
+        color: #bbb;
+    }
+
+    #header_top {
+        top: 0;
+    }
+
+    #footer_bottom {
+        bottom: 0;
+    }
+
+    #main,
+    #setting,
+    #bgcolor {
+        background: #000;
+        color: #fff;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 50px;
+        line-height: 50px;
+    }
+
+    #read .aui-range {
+        display: block;
+        margin-bottom: -5px;
+    }
+
+    #read .aui-range input {
+        display: inline-block;
+        width: 80%;
+        margin-bottom: -3px;
+    }
+
+    #read .aui-list-item,
+    #read .aui-list-item-inner {
+        background: #000;
+        color: #fff;
+    }
+
+    #read .aui-range-tip {
+        display: none;
+    }
+
+    #read .nums {
+        position: absolute;
+        right: 2px;
+        margin-bottom: -2px;
+        font-size: 10px;
+    }
+
+    #setting,
+    #main,
+    #bgcolor {
+        margin: 0;
+        padding: 0;
+    }
+
+    #setting .fontcolor i {
+        display: inline-block;
+        padding: 0;
+        width: 20px;
+        height: 16px;
+        margin-right: 0.3rem;
+    }
+    </style>
+</head>
+<body id="read">
+    <div id="header_top">
+        <span id="header_time" class="aui-pull-left"></span>
+        <span id="header_opea" class="aui-pull-right"></span>
+    </div>
+    <div id="footer_bottom" class="aui-ellipsis-1">
+        <span class="aui-pull-left" id="book_shuming"></span>
+        <span class="aui-pull-right aui-text-primary" id="chongxindakai" onclick="agignopen()" tapmode>乱码?</span>
+    </div>
+    <header class="aui-bar aui-bar-nav aui-hide" id="header">
+        <a class="aui-pull-left aui-btn" onclick="readback()" tapmode>
+            <span class="aui-iconfont aui-icon-left"></span>
+        </a>
+    </header>
+    <div id="main" class="aui-hide">
+        <ul class="aui-list aui-form-list">
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-input">
+                        <div class="aui-range">
+                            <input type="range" class="aui-range" value="0" max="100" min="1" step="1" id="progress" />
+                            <span id="nums"></span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div id="setting" class="aui-hide">
+        <ul class="aui-list">
+            <li class="aui-list-item fontcolor">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-title">
+                        <i class="fa fa-font" tapmode onclick="setfont(2)" style="width: auto;color:#fff;">+</i>
+                        <i class="fa fa-font" tapmode onclick="setfont(-2)" style="width: auto;color:#fff">-</i>
+                        <i tapmode onclick="setcolor('#FAF7ED')" style="color:#FAF7ED;background:#FAF7ED;" class="fa fa-circle"></i>
+                        <i tapmode onclick="setcolor('#E9FAFF')" style="color:#E9FAFF;background:#E9FAFF;" class="fa fa-circle"></i>
+                        <i tapmode onclick="setcolor('#FFFFED')" style="color:#FFFFED;background:#FFFFED;" class="fa fa-circle"></i>
+                        <i tapmode onclick="setcolor('#FCEFFF')" style="color:#FCEFFF;background:#FCEFFF;" class="fa fa-circle"></i>
+                        <i tapmode onclick="setcolor('#000')" style="box-shadow: 0 0 2px #fff;color:#000;background:#000;" class="fa fa-circle"></i>
+                        <i tapmode onclick="setcolor('#fff')" style="color:#fff;background:#fff;" class="fa fa-circle"></i>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div id="bgcolor" class="aui-hide">
+        <ul class="aui-list aui-form-list">
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-input">
+                        <div class="aui-range">
+                            <i class="fa fa-sun-o aui-text-default"></i>
+                            <input type="range" class="aui-range" value="0" max="100" min="1" step="1" id="light" />
+                            <i class="fa fa-sun-o aui-text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <footer class="aui-bar aui-bar-tab aui-hide" id="footer">
+        <div class="aui-bar-tab-item" tapmode onclick="jindu()">
+            <div class="aui-bar-tab-label">进度</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="setting()">
+            <div class="aui-bar-tab-label">字体</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="beijing()">
+            <div class="aui-bar-tab-label">亮度</div>
+        </div>
+    </footer>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-range.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript">
+var toast = new auiToast({});
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
+var indexSetting = $api.getStorage('appinfo');
+indexSetting.userinfo = $api.getStorage('userinfo');
+indexSetting.fontsize = 16;
+indexSetting.bg = ($api.getStorage('yejianmoshi') > 0) ? "#212121" : "#ffffee";
+indexSetting.color = ($api.getStorage('yejianmoshi') > 0) ? "#eee" : "#333";
+var thebook = {};
+apiready = function() {
+    autocheckyejian();
+    api.setFullScreen({
+        fullScreen: true
+    });
+    api.parseTapmode();
+    indexSetting.url = api.pageParam.url;
+    indexSetting.book_name = api.pageParam.name;
+    indexSetting.bianma = api.pageParam.bianma ? api.pageParam.bianma : 'utf8';
+    setbookname(indexSetting.book_name);
+    getcurrent();
+    $api.text($api.byId('header_opea'), api.operator);
+    api.addEventListener({
+        name: 'keyback'
+    }, function(ret, err) {
+        if (ret) {
+            readback();
+        }
+    });
+    //加载阅读器 start
+    indexSetting.bookReader = api.require('bookReader');
+    indexSetting.bookReader.open({
+        filePath: indexSetting.url,
+        codingType: indexSetting.bianma,
+        bg: indexSetting.bg,
+        h: api.winHeight - 60,
+        y: 30,
+        textStyle: {
+            size: indexSetting.fontsize,
+            color: indexSetting.color
+        }
+    }, function(ret, err) {
+        toast.hide()
+        if (ret) {
+            switch (ret.eventType) {
+                case 'click':
+                    if ($api.hasCls($api.byId('header'), 'aui-hide')) {
+                        $api.addCls($api.byId("main"), "aui-hide");
+                        $api.addCls($api.byId("setting"), "aui-hide");
+                        $api.addCls($api.byId("bgcolor"), "aui-hide");
+                        $api.removeCls($api.byId("footer"), "aui-hide");
+                        $api.removeCls($api.byId("header"), "aui-hide");
+                    } else {
+                        addhide();
+                    }
+                    break;
+                case 'page_begin':
+                case 'page_end':
+                    toast.fail({
+                        title: '没有了',
+                        duration: 2000
+                    });
+                    break;
+                default:
+                    addhide();
+                    break;
+            }
+        } else {
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+
+    //      加载阅读器 end
+};
+
+function getcurrent() {
+    var d = new Date()
+    var time = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+    $api.text($api.byId('header_time'), time);
+    setTimeout(function() {
+        getcurrent();
+    }, 1000);
+}
+
+function setbookname(book_name) {
+    $api.text($api.byId('book_shuming'), '书名:' + book_name);
+}
+
+function addhide() {
+    $api.addCls($api.byId("main"), "aui-hide");
+    $api.addCls($api.byId("setting"), "aui-hide");
+    $api.addCls($api.byId("bgcolor"), "aui-hide");
+    $api.addCls($api.byId("footer"), "aui-hide");
+    $api.addCls($api.byId("header"), "aui-hide");
+}
+
+function readback() {
+    indexSetting.bookReader.getProgress({
+        filePath: indexSetting.url
+    }, function(ret, err) {
+        if (ret.status) {
+            var progress = parseInt(ret.progress);
+            var bendibook = $api.getStorage('bendibook');
+            for (var i = 0, len = bendibook.data.length; i < len; i++) {
+                if (indexSetting.url == bendibook.data[i].url) {
+                    bendibook.data[i].percent = progress;
+                }
+            }
+            $api.setStorage('bendibook', bendibook);
+        }
+    });
+    indexSetting.bookReader.close(function(ret, err) {});
+    api.setFullScreen({
+        fullScreen: false
+    });
+    api.closeWin();
+}
+// 查看和操作进度
+function jindu() {
+    indexSetting.bookReader.getProgress(function(ret, err) {
+        if (ret.status) {
+            $api.removeCls($api.byId('main'), 'aui-hide');
+            $api.addCls($api.byId('footer'), 'aui-hide');
+            $api.val($api.byId('progress'), ret.progress);
+            $api.text($api.byId('nums'), ret.progress + '%');
+        } else {
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}
+// 设置进度
+var range = new auiRange({
+    element: document.getElementById("progress") //滑块容器
+}, function(ret) {
+    $api.text($api.byId('nums'), ret.value + '%');
+})
+$api.addEvt($api.byId('progress'), 'touchend', function() {
+    var progress = $api.val($api.byId('progress'));
+    indexSetting.bookReader.setValue({
+        progress: progress
+    }, function(ret, err) {
+        if (ret.status) {} else {
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}, false);
+
+$api.addEvt($api.byId('light'), 'touchend', function() {
+    var light = $api.val($api.byId('light'));
+    indexSetting.bookReader.setBrightness({
+        brightness: light
+    }, function(ret, err) {
+        if (ret.status) {} else {
+
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}, false);
+
+function setfont(num) {
+    indexSetting.fontsize += parseInt(num);
+    indexSetting.bookReader.setValue({
+        textStyle: {
+            size: indexSetting.fontsize,
+            color: indexSetting.color
+        }
+    }, function(ret, err) {
+        if (ret.status) {} else {
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}
+
+function setcolor(color) {
+    indexSetting.bg = color;
+    indexSetting.bookReader.setValue({
+        bg: indexSetting.bg
+    }, function(ret, err) {
+        if (ret.status) {
+            $api.css($api.byId('read'), 'background:' + indexSetting.bg);
+        } else {
+
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}
+// 进行设置操作
+function setting() {
+    $api.addCls($api.byId("main"), "aui-hide");
+    $api.addCls($api.byId("bgcolor"), "aui-hide");
+    $api.addCls($api.byId("footer"), "aui-hide");
+    $api.removeCls($api.byId("setting"), "aui-hide");
+    indexSetting.bookReader.getBrightness(function(ret, err) {
+        if (ret.status) {
+            $api.val($api.byId('light'), ret.brightness);
+        } else {
+			toast.fail({
+				title:err.msg,
+				duration:2000
+			})
+        }
+    });
+}
+
+function beijing() {
+    $api.addCls($api.byId("main"), "aui-hide");
+    $api.addCls($api.byId("setting"), "aui-hide");
+    $api.addCls($api.byId("footer"), "aui-hide");
+    $api.removeCls($api.byId("bgcolor"), "aui-hide");
+}
+// 分享
+
+function agignopen() {
+    var code = (indexSetting.bianma == 'utf8') ? 'gbk' : 'utf8';
+    openwin('readbendi', {
+            url: indexSetting.url,
+            name: indexSetting.book_name,
+            bianma: code
+        })
+}
+</script>
+</html>
