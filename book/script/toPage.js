@@ -1,5 +1,4 @@
 $(function () {
-  
     function getKeys(data){
         var keys={};
         for (var i = data.length - 1; i >= 0; i--) {
@@ -28,7 +27,7 @@ $(function () {
       var searchURL = window.location.search;
       var paras=parseUrl(searchURL);
       var key=paras["key"];
-      
+
       //封装ajax代码
     function ajax_datatypeByJson(type, url, json_data, succ_func,err_func) {//data数据可以为空
       $.ajax({
@@ -37,7 +36,7 @@ $(function () {
           dataType: "json",
           data: json_data,
           error: function (data) {
-              //请求失败时被调用的函数 
+              //请求失败时被调用的函数
               err_func(data);
           },
           success: function (data) {
@@ -64,10 +63,10 @@ $(function () {
 
           /*调用分页方法,初始化数据*/
           page_ctrl(obj_1);
-          
+
     }
 
-   
+
 
     ajax_datatypeByJson('get','/novel/chapterNList.action',{'encr':paras["encr"],keys:paras["keys"],'offset':0,'length':1},page_change1,function () {});
 
@@ -129,8 +128,8 @@ $(function () {
 
             for(var i=0;i<le;i++){
 
-                 page_content+="<li><div class=\"msg\"><a href='chapterContent.html?encr="+chapters[i].url+"&keys="+JSON.stringify(keys[i])+"'>"+chapters[i].title+"</a></div></li>"   
-            
+                 page_content+="<li><div class=\"msg\"><a href='chapterContent.html?encr="+chapters[i].url+"&keys="+JSON.stringify(keys[i])+"'>"+chapters[i].title+"</a></div></li>"
+
           }
 
           $(obj_box).children('.page_content').html(page_content);
@@ -242,7 +241,7 @@ $(function () {
       page_even();
 
       $(obj_box+' .page_ctrl').on('click','button',function () {
-     
+
         var that=$(this);
 
         if(that.hasClass('prev_page')){

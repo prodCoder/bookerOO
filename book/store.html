@@ -356,27 +356,12 @@ function initload() {
     var hasbendi = [];
     indexSetting.userinfo = $api.getStorage('userinfo');
     indexSetting.history = $api.getStorage('history');
-        // api.ajax({
-        //     url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=store&param=bbsuid----' + indexSetting.userinfo.bbsuid,
-        //     method: 'get'
-        // }, function(ret, err) {
-        var ret = {
-        	"status": 1,
-        	"bookstore": {
-        		"data": [{
-        				"book_id": "0001",
-        				"image": "https://www.bxwx9.org/modules/article/images/nocover.jpg",
-        				"book_name": "我欲封天",
-        				"desco": "这是一本好书",
-        				"avatar": "",
-        				"author": "超级大坦克科比",
-        				"colums": 100
-        			}
-        		]
-        	}
-        };
-            if (ret) {
-                if (ret.status) {
+        api.ajax({
+            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=store&param=bbsuid----' + indexSetting.userinfo.bbsuid,
+            method: 'get'
+        }, function(ret, err) {
+            if (!ret) {
+                if (!ret.status) {
                     var temp = $api.text($api.byId("main-temp"));
                     var dottemp = doT.template(temp);
                     ret.historybook = indexSetting.history;
@@ -423,14 +408,14 @@ function initload() {
                     });
                 }
             }
-        //     else {
-        //         var msg = JSON.stringify(err);
-        //         toast.fail({
-        //             title: msg.msg,
-        //             duration: 2000
-        //         });
-        //     }
-        // });
+            else {
+                var msg = JSON.stringify(err);
+                toast.fail({
+                    title: msg.msg,
+                    duration: 2000
+                });
+            }
+        });
 }
 
 function openslide() {
