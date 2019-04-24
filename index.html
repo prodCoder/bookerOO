@@ -2,187 +2,189 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
     <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
     <title></title>
-    <link rel="stylesheet" type="text/css" href="./css/aui.2.0.css" />
-    <link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" id="yejiancssindex" />
+    <link rel="stylesheet" type="text/css" href="./css/aui.2.0.css"/>
+    <link rel="stylesheet" type="text/css" href="./css/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" id="yejiancssindex"/>
 </head>
 <body>
-    <footer class="aui-bar aui-bar-tab" id="footer">
-        <div class="aui-bar-tab-item " tapmode id="tabstore">
-            <i class="fa fa-bank"></i>
-            <div class="aui-bar-tab-label">书架</div>
-        </div>
-        <div class="aui-bar-tab-item aui-active" tapmode id="tabjingxuan">
-            <i class="fa fa-diamond"></i>
-            <div class="aui-bar-tab-label">精选</div>
-        </div>
-        <div class="aui-bar-tab-item" tapmode id="tabbookku">
-            <i class="fa fa-database"></i>
-            <div class="aui-bar-tab-label">书库</div>
-        </div>
-        <div class="aui-bar-tab-item" tapmode id="tabfaxian">
-            <i class="fa fa-dot-circle-o"></i>
-            <div class="aui-bar-tab-label">发现</div>
-        </div>
-    </footer>
-    <div id="main"></div>
+<footer class="aui-bar aui-bar-tab" id="footer">
+    <div class="aui-bar-tab-item " tapmode id="tabstore">
+        <i class="fa fa-bank"></i>
+        <div class="aui-bar-tab-label">书架</div>
+    </div>
+    <div class="aui-bar-tab-item aui-active" tapmode id="tabjingxuan">
+        <i class="fa fa-diamond"></i>
+        <div class="aui-bar-tab-label">精选</div>
+    </div>
+    <div class="aui-bar-tab-item" tapmode id="tabbookku">
+        <i class="fa fa-database"></i>
+        <div class="aui-bar-tab-label">书库</div>
+    </div>
+    <div class="aui-bar-tab-item" tapmode id="tabfaxian">
+        <i class="fa fa-dot-circle-o"></i>
+        <div class="aui-bar-tab-label">发现</div>
+    </div>
+</footer>
+<div id="main"></div>
 </body>
 <script type="text/javascript" src="./script/api.js"></script>
 <script type="text/javascript" src="./script/aui-tab.js"></script>
 <script type="text/javascript">
-var indexSetting = {
-    appkey: '33ff1ca1cd563653902cfee999750e001',
-    url: "http://112.74.48.36:8080/",
-    userurl:"http://172.17.42.223:8000/"
-};
-if (!$api.getStorage('yejianmoshi')) {
-    $api.setStorage('yejianmoshi', 0);
-}
-apiready = function() {
-  autocheckyejian();
-    $api.fixStatusBar($api.dom('header'));
-    api.parseTapmode();
-    $api.setStorage('nvtabbar', 'jingxuan');
-    if (!!api.pageParam.from && api.pageParam.from == 'logout') {
-        toast.success({
-            title: "成功退出",
-			duration:2000
-        });
+    var indexSetting = {
+        appkey: '33ff1ca1cd563653902cfee999750e001',
+        url: "http://112.74.48.36:8080/",
+        userurl: "http://112.74.48.36:8000/"
+    };
+    if (!$api.getStorage('yejianmoshi')) {
+        $api.setStorage('yejianmoshi', 0);
     }
-    api.addEventListener({
-        name: 'appintent'
-    }, function(ret, err) {
-        var appParam = ret.appParam;
-        if (api.systemType == 'ios') {
-            var baoming = ret.iosUrl;
-        } else {
-            var baoming = ret.sourceAppId;
+    apiready = function () {
+        autocheckyejian();
+        $api.fixStatusBar($api.dom('header'));
+        api.parseTapmode();
+        $api.setStorage('nvtabbar', 'jingxuan');
+        if (!!api.pageParam.from && api.pageParam.from == 'logout') {
+            toast.success({
+                title: "成功退出",
+                duration: 2000
+            });
         }
-        if (/book_id=(\d+)[^\d]*/i.test(appParam)) {
-            var bookids = appParam.match(/book_id=(\d+)[^\d]*/i);
-            if (parseInt(bookids[1])) {
-                api.openWin({
-                    name: 'book_' + parseInt(bookids[1]),
-                    url: './book/book.html',
-                    rect: {
-                        x: 0,
-                        y: 0,
-                        w: api.winWidth,
-                        h: api.winHeight
-                    },
-                    useWKWebView:true,
-                    historyGestureEnabled:true,
-                    bgColor: "#ffffff",
-                    pageParam: {
-                        book_id: parseInt(bookids[1])
-                    },
-                    bounces: false,
-                    reload: true,
-                    vScrollBarEnabled: true,
-                    hScrollBarEnabled: false,
-                    animation: {
-                        type: "push",
-                        subType: "from_right",
-                        duration: 300
-                    }
-                });
+        api.addEventListener({
+            name: 'appintent'
+        }, function (ret, err) {
+            var appParam = ret.appParam;
+            if (api.systemType == 'ios') {
+                var baoming = ret.iosUrl;
+            } else {
+                var baoming = ret.sourceAppId;
             }
-        }
-    });
-    api.addEventListener({
-        name: 'keyback'
-    }, function(ret, err) {
-        api.historyBack({}, function(ret, err) {
-            if (!ret.status) {
-                api.closeWin();
+            if (/book_id=(\d+)[^\d]*/i.test(appParam)) {
+                var bookids = appParam.match(/book_id=(\d+)[^\d]*/i);
+                if (parseInt(bookids[1])) {
+                    api.openWin({
+                        name: 'book_' + parseInt(bookids[1]),
+                        url: './book/book.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: api.winWidth,
+                            h: api.winHeight
+                        },
+                        useWKWebView: true,
+                        historyGestureEnabled: true,
+                        bgColor: "#ffffff",
+                        pageParam: {
+                            book_id: parseInt(bookids[1])
+                        },
+                        bounces: false,
+                        reload: true,
+                        vScrollBarEnabled: true,
+                        hScrollBarEnabled: false,
+                        animation: {
+                            type: "push",
+                            subType: "from_right",
+                            duration: 300
+                        }
+                    });
+                }
             }
         });
-    });
-    if (!$api.getStorage('appinfo')) {
-        $api.setStorage('appinfo', {
-            appkey: indexSetting.appkey,
-            url: indexSetting.url,
-            userurl:indexSetting.userurl
+        api.addEventListener({
+            name: 'keyback'
+        }, function (ret, err) {
+            api.historyBack({}, function (ret, err) {
+                if (!ret.status) {
+                    api.closeWin();
+                }
+            });
+        });
+        if (!$api.getStorage('appinfo')) {
+            $api.setStorage('appinfo', {
+                appkey: indexSetting.appkey,
+                url: indexSetting.url,
+                userurl: indexSetting.userurl
+            });
+        }
+        if (!$api.getStorage('userinfo')) {
+            $api.setStorage('userinfo', {
+                avatar: "../image/liulangnan.png",
+                uid: 0,
+                bbsuid: 0,
+                name: "游客",
+                group: "登录帐号,记录点滴阅读",
+                time: (new Date().getTime())
+            });
+        }
+        initload();
+        openframe('jingxuan');
+        navbottom();
+    };
+
+    function openframe(name) {
+        api.openFrame({
+            name: name,
+            url: './book/' + name + '.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: api.winWidth,
+                h: api.winHeight - 50
+            },
+            progress: {
+                type: "page"
+            },
+            bgColor: "#ffffff",
+            reload: false,
+            bounces: false,
+            vScrollBarEnabled: false,
+            hScrollBarEnabled: false,
+            animation: {
+                type: "none",
+                subType: "from_right",
+                duration: 300
+            }
         });
     }
-    if (!$api.getStorage('userinfo')) {
-        $api.setStorage('userinfo', {
-            avatar: "../image/liulangnan.png",
-            uid: 0,
-            bbsuid: 0,
-            name: "游客",
-            group: "登录帐号,记录点滴阅读",
-            time: (new Date().getTime())
+
+    function initload() {
+        api.ajax({
+            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=init',
+            method: 'get'
+        }, function (ret, err) {
+            if (ret.status) {
+                var appinfo = ret.data;
+                appinfo.appkey = indexSetting.appkey;
+                appinfo.url = indexSetting.url;
+                $api.setStorage('appinfo', appinfo);
+            }
         });
     }
-    initload();
-    openframe('jingxuan');
-    navbottom();
-};
-function openframe(name) {
-    api.openFrame({
-        name: name,
-        url: './book/' + name + '.html',
-        rect: {
-            x: 0,
-            y: 0,
-            w: api.winWidth,
-            h: api.winHeight - 50
-        },
-        progress: {
-            type: "page"
-        },
-        bgColor: "#ffffff",
-        reload: false,
-        bounces: false,
-        vScrollBarEnabled: false,
-        hScrollBarEnabled: false,
-        animation: {
-            type: "none",
-            subType: "from_right",
-            duration: 300
-        }
-    });
-}
 
-function initload() {
-    api.ajax({
-        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=init',
-        method: 'get'
-    }, function(ret, err) {
-        if (ret.status) {
-            var appinfo = ret.data;
-            appinfo.appkey = indexSetting.appkey;
-            appinfo.url = indexSetting.url;
-            $api.setStorage('appinfo', appinfo);
-        }
-    });
-}
-
-function navbottom() {
-    var tab = new auiTab({
-        element: document.getElementById("footer"),
-        index: 2,
-        repeatClick: false
-    }, function(ret) {
-        switch (ret.index) {
-            case 1:
-                openframe('store');
-                break;
-            case 2:
-                openframe('jingxuan');
-                break;
-            case 3:
-                openframe('bookku');
-                break;
-            case 4:
-                openframe('faxian');
-                break;
-        }
-    });
-}
+    function navbottom() {
+        var tab = new auiTab({
+            element: document.getElementById("footer"),
+            index: 2,
+            repeatClick: false
+        }, function (ret) {
+            switch (ret.index) {
+                case 1:
+                    openframe('store');
+                    break;
+                case 2:
+                    openframe('jingxuan');
+                    break;
+                case 3:
+                    openframe('bookku');
+                    break;
+                case 4:
+                    openframe('faxian');
+                    break;
+            }
+        });
+    }
 </script>
 </html>

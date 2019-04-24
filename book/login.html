@@ -265,8 +265,9 @@ function login() {
         title:"登陆中",
         duration:2000
     })
+    console.log(indexSetting.userurl+'user/loginNew');
     api.ajax({
-        url: 'http://172.17.42.223:8000/user/loginNew',
+        url: indexSetting.userurl+'user/loginNew',
         method: 'post',
         data:{
           body:JSON.stringify({"username":username,"password":password})

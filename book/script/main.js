@@ -1,5 +1,5 @@
  var ks_host = "3g";
-
+ var indexSetting = $api.getStorage('appinfo');
 //打开bookInfo.html
  function openbooknew(id,chapterUrl,keys) {
    console.log(id+chapterUrl+keys);
@@ -106,7 +106,7 @@ $(function(){
       });
     }
   // 首页推荐小说
-  ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getIndexRecommendNovels.action',{'index':0},getIndexRecommendNovels,function(){});
+  ajax_datatypeByJson('GET',indexSetting.url+'novel/getIndexRecommendNovels.action',{'index':0},getIndexRecommendNovels,function(){});
 
   function getIndexRecommendNovels(data) {
     console.log(data);
@@ -155,7 +155,7 @@ $(function(){
       }
       $("#hotNovels").html(hRecommend);
     }
-    ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getHotNovels.action',{'index':hotMoreIndex},getHotNovels,function(){});
+    ajax_datatypeByJson('GET',indexSetting.url+'novel/getHotNovels.action',{'index':hotMoreIndex},getHotNovels,function(){});
 
     // 热门更多，绑定点击事件
     getHotNovelsClick0()
@@ -172,7 +172,7 @@ $(function(){
           var pre=$("#hotMore").closest('ul').prev("ul").html();
           $("#hotMore").closest('ul').prev("ul").html(pre+hRecommend);
         }
-        ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getHotNovels.action',{'index':hotMoreIndex},getHotNovelsClick,function(){});
+        ajax_datatypeByJson('GET',indexSetting.url+'novel/getHotNovels.action',{'index':hotMoreIndex},getHotNovelsClick,function(){});
       });
     }
 
@@ -187,7 +187,7 @@ $(function(){
       }
       $("#fanNovels").html(hRecommend);
     }
-    ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getFanNovels.action',{'index':fanMoreIndex},getFanNovels,function(){});
+    ajax_datatypeByJson('GET',indexSetting.url+'novel/getFanNovels.action',{'index':fanMoreIndex},getFanNovels,function(){});
 
       // 粉丝推荐更多，绑定点击事件
     getFanNovelsClick0()
@@ -204,7 +204,7 @@ $(function(){
           var pre=$("#fanMore").closest('ul').prev("ul").html();
           $("#fanMore").closest('ul').prev("ul").html(pre+hRecommend);
         }
-        ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getFanNovels.action',{'index':fanMoreIndex},getFanNovelsClick,function(){});
+        ajax_datatypeByJson('GET',indexSetting.url+'novel/getFanNovels.action',{'index':fanMoreIndex},getFanNovelsClick,function(){});
       });
     }
 
@@ -219,7 +219,7 @@ $(function(){
       }
       $("#boyNovels").html(hRecommend);
     }
-    ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getBoyNovels.action',{'index':boyMoreIndex},getBoyNovels,function(){});
+    ajax_datatypeByJson('GET',indexSetting.url+'novel/getBoyNovels.action',{'index':boyMoreIndex},getBoyNovels,function(){});
 
       // 男生推荐更多，绑定点击事件
     getBoyNovelsClick0()
@@ -237,7 +237,7 @@ $(function(){
           $("#boyMore").closest('ul').prev("ul").html(pre+hRecommend);
           // alert(pre);
         }
-         ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getBoyNovels.action',{'index':boyMoreIndex},getBoyNovelsClick,function(){});
+         ajax_datatypeByJson('GET',indexSetting.url+'novel/getBoyNovels.action',{'index':boyMoreIndex},getBoyNovelsClick,function(){});
 
       });
     }
@@ -254,7 +254,7 @@ $(function(){
       }
       $("#girlNovels").html(hRecommend);
     }
-    ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getGirlNovels.action',{'index':girlMoreIndex},getGirlNovels,function(){});
+    ajax_datatypeByJson('GET',indexSetting.url+'novel/getGirlNovels.action',{'index':girlMoreIndex},getGirlNovels,function(){});
     // 女生推荐更多，绑定点击事件
     getGirlNovelsClick0()
     function getGirlNovelsClick0() {
@@ -270,17 +270,9 @@ $(function(){
           var pre=$("#girlMore").closest('ul').prev("ul").html();
           $("#girlMore").closest('ul').prev("ul").html(pre+hRecommend);
         }
-         ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getGirlNovels.action',{'index':girlMoreIndex},getGirlNovelsClick,function(){});
+         ajax_datatypeByJson('GET',indexSetting.url+'novel/getGirlNovels.action',{'index':girlMoreIndex},getGirlNovelsClick,function(){});
       });
     }
-
-
-
-
-
-
-
-
 
      // 免费推荐
      var otherMoreIndex=0;
@@ -293,7 +285,7 @@ $(function(){
       }
       $("#otherNovels").html(hRecommend);
     }
-    ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getOtherNovels.action',{'index':otherMoreIndex},getOtherNovels,function(){});
+    ajax_datatypeByJson('GET',indexSetting.url+'novel/getOtherNovels.action',{'index':otherMoreIndex},getOtherNovels,function(){});
     // 免费推荐更多，绑定点击事件
     getOtherNovelsClick0()
     function getOtherNovelsClick0() {
@@ -309,7 +301,7 @@ $(function(){
           var pre=$("#otherMore").closest('ul').prev("ul").html();
           $("#otherMore").closest('ul').prev("ul").html(pre+hRecommend);
         }
-         ajax_datatypeByJson('GET','http://112.74.48.36:8080/novel/getOtherNovels.action',{'index':otherMoreIndex},getOtherNovelsClick,function(){});
+         ajax_datatypeByJson('GET',indexSetting.url+'novel/getOtherNovels.action',{'index':otherMoreIndex},getOtherNovelsClick,function(){});
       });
     }
 
