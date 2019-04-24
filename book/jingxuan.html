@@ -266,6 +266,11 @@ apiready = function() {
         textUp: '松开刷新...',
         showTime: true
     }, function(ret, err) {
+      openbook(123);
+      //清空本地
+      $api.setStorage('appinfo', null);
+      alert("清空本地storage：localstore");
+
         ajaxuser();
         setTimeout(function() {
             indexSetting.uerinfo = $api.getStorage('userinfo');

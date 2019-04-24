@@ -1,5 +1,32 @@
  var ks_host = "3g";
 
+//打开bookInfo.html
+ function openbooknew(id,chapterUrl,keys) {
+   console.log(id+chapterUrl+keys);
+     api.openWin({
+         name: 'book',
+         url: 'novelinfo/bookInfo.html?key='+id+'&encr='+chapterUrl+'&keys='+keys,
+         rect: {
+             x: 0,
+             y: 0,
+             w: api.winWidth,
+             h: api.winHeight
+         },
+         bgColor: "#ffffff",
+         useWKWebView:true,
+         historyGestureEnabled:true,
+         bounces: false,
+         reload: true,
+         vScrollBarEnabled: true,
+         hScrollBarEnabled: false,
+         animation: {
+             type: "push",
+             subType: "from_right",
+             duration: 300
+         }
+     });
+ }
+
 var ks_uid = 0;
 $(function(){
   var indexSetting = $api.getStorage('appinfo');
@@ -23,11 +50,11 @@ $(function(){
    }
 
    function showImgNovel2html(data,keys){
-    // console.log(keys);
-    // alert(keys);
     if(data["status"]==1)status="连载中";else status="完结";
     if(data["length"]>=10000)length=parseInt(parseInt(data["length"])/1000)/10.0+"万";else length=data["length"];
-    var hDiv="<a href='"+"novelinfo/bookInfo.html?key="+data["id"]+"&encr="+data["chapterUrl"]+"&keys="+keys+"'>"
+    // var hDiv="<a href='"+"novelinfo/bookInfo.html?key="+data["id"]+"&encr="+data["chapterUrl"]+"&keys="+keys+"'>"
+    //方法中不能传对象只能传递直接值
+    var hDiv="<a href='javascript:openbooknew(\""+data["id"]+"\",\""+data["chapterUrl"]+"\","+JSON.stringify(keys)+");'>"
     +"<div class=\"bcover fl\"> "
     +"<img src=\""+data["img"]+"\" onerror=\"this.src='http://img.kanshu.com/articleInfo/images/nopic.jpg';this.onerror='';\""
     +"alt=\"\" height=\"130\" width=\"85\" /> "

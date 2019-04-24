@@ -202,7 +202,8 @@
                                 <span class="aui-margin-l-5">{{=it.bookstore.data[i].author}}</span>
                             </div>
                             <div class="aui-info-item">
-                                <span class="">已更新{{=it.bookstore.data[i].colums}}章</span>
+                                <span class="">最新章:
+                                {{=it.bookstore.data[i].colums}}</span>
                             </div>
                         </div>
                     </div>
@@ -221,10 +222,10 @@
 <script type="text/javascript" src="../script/aui-toast.js"></script>
 <script type="text/javascript">
 var toast = new auiToast({});
-// toast.loading({
-//     title:"loading...",
-//     duration:2000
-// })
+toast.loading({
+    title:"loading...",
+    duration:2000
+})
 var popup = new auiPopup();
 var indexSetting = $api.getStorage('appinfo');
 var timer = null;
@@ -356,17 +357,21 @@ function initload() {
     var hasbendi = [];
     indexSetting.userinfo = $api.getStorage('userinfo');
     indexSetting.history = $api.getStorage('history');
+    console.log(JSON.stringify(indexSetting));
         api.ajax({
-            url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=store&param=bbsuid----' + indexSetting.userinfo.bbsuid,
+            // url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=store&param=bbsuid----' + indexSetting.userinfo.bbsuid,
+            url: indexSetting.userurl+'shelf/shelfInfo?username='+indexSetting.userinfo.bbsuid,
             method: 'get'
         }, function(ret, err) {
-            if (!ret) {
-                if (!ret.status) {
+            if (ret) {
+              console.log(JSON.stringify(ret));
+                if (ret.status) {
                     var temp = $api.text($api.byId("main-temp"));
                     var dottemp = doT.template(temp);
                     ret.historybook = indexSetting.history;
                     var localstore = $api.getStorage('localstore');
                     if(indexSetting.userinfo.uid && indexSetting.userinfo.bbsuid){
+                      alert("indexSetting.userinfo.uid && indexSetting.userinfo.bbsuid");
                         if(localstore && localstore.data){
                             localstore.data.forEach(function(book){
                                 hasbendi.push(book.book_id)

@@ -35,7 +35,8 @@
 <script type="text/javascript">
 var indexSetting = {
     appkey: '33ff1ca1cd563653902cfee999750e001',
-    url: "http://112.74.48.36:8080/novel"
+    url: "http://112.74.48.36:8080/",
+    userurl:"http://172.17.42.223:8000/"
 };
 if (!$api.getStorage('yejianmoshi')) {
     $api.setStorage('yejianmoshi', 0);
@@ -103,7 +104,8 @@ apiready = function() {
     if (!$api.getStorage('appinfo')) {
         $api.setStorage('appinfo', {
             appkey: indexSetting.appkey,
-            url: indexSetting.url
+            url: indexSetting.url,
+            userurl:indexSetting.userurl
         });
     }
     if (!$api.getStorage('userinfo')) {

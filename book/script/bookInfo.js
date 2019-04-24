@@ -108,32 +108,31 @@ $(function(){
           dataType: 'json',
           data:{'key':key},
           success:function(data){
-          	console.log(data);
           	data= data["novel"];
-						bookinfo=data;
-						//添加本地阅读图书
-						addbook={
-							  "book_id": bookinfo["id"],
-        				"image": bookinfo["img"],
-        				"book_name": bookinfo["name"],
-        				"desco": bookinfo["introduction"],
-        				"avatar": bookinfo["img"],
-        				"author": bookinfo["author"],
-        				"colums": bookinfo["lastUpdateChapter"]
-						}
-	            var localstore={};
-	            if ($api.getStorage('localstore')) {
-	                localstore = ($api.getStorage('localstore'));
-	            } else {
-	                localstore = {
-										"data":[]
-									};
-	            }
-	            //判重
-	            localstore.data.push(addbook);
-	            $api.setStorage('localstore', localstore);
-							console.log(JSON.stringify($api.getStorage('localstore')));
-						  console.log(data);
+						// bookinfo=data;
+						// //添加本地阅读图书
+						// addbook={
+						// 	  "book_id": bookinfo["id"],
+        		// 		"image": bookinfo["img"],
+        		// 		"book_name": bookinfo["name"],
+        		// 		"desco": bookinfo["introduction"],
+        		// 		"avatar": bookinfo["img"],
+        		// 		"author": bookinfo["author"],
+        		// 		"colums": bookinfo["lastUpdateChapter"]
+						// }
+	          //   var localstore={};
+	          //   if ($api.getStorage('localstore')) {
+	          //     	localstore = ($api.getStorage('localstore'));
+	          //   }else {
+	          //       localstore = {
+						// 				"data":[]
+						// 			};
+	          //   }
+	          //   //判重
+	          //   localstore.data.push(addbook);
+	          //   $api.setStorage('localstore', localstore);
+						// 	console.log(JSON.stringify($api.getStorage('localstore')));
+						//   console.log(data);
 
           	var rightDiv=showRightDiv(data);
           	$("#picRight").html(rightDiv);

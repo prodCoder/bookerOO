@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="../css/aui.2.0.css" />
     <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" id="yejiancss" />
+    <script type="text/javascript" src="script/jquery.js"></script>
     <script type="text/javascript" src="../script/api.js"></script>
     <script type="text/javascript" src="../script/aui-toast.js"></script>
     <style type="text/css">
@@ -232,6 +233,24 @@ function daojishi() {
     }
 }
 
+
+// $.ajax({
+//     url: 'http://172.17.42.223:8000/user/loginNew',
+//     type: 'POST',
+//     contentType:'application/json;charset=utf-8',
+//     data:JSON.stringify({"username":username,"password":password}),
+//     // dataType:"String",
+//     success:function(ret2){
+//       toast.hide();
+//           toast.success({
+//               title: "登录成功",
+//               duration: 2000
+//           });
+//           alert("登录成功");
+//     }
+// });
+
+
 function login() {
     var username = $api.trim($api.val($api.byId('username')));
     var password = $api.trim($api.val($api.byId('password')));
@@ -247,10 +266,18 @@ function login() {
         duration:2000
     })
     api.ajax({
-        url: indexSetting.url + 'api.php?appkey=' + indexSetting.appkey + '&type=get&module=login&param=username----' + (username) + ',pass----' + ('uslzkw' + password + 'aqlcje'),
-        method: 'get'
+        url: 'http://172.17.42.223:8000/user/loginNew',
+        method: 'post',
+        data:{
+          body:JSON.stringify({"username":username,"password":password})
+        },
+        headers:{
+          "Content-Type":"application/json"
+        }
     }, function(ret2, err2) {
         toast.hide();
+        console.log(JSON.stringify(ret2));
+        console.log(JSON.stringify(err2));
         if (ret2.status) {
             toast.success({
                 title: "登录成功",
@@ -260,7 +287,8 @@ function login() {
             api.execScript({
                 name: 'root',
                 frameName: 'store',
-                script: "checkstatus();indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();$api.attr($api.byId('avatar'),'src','" + ret2.data.avatar + "')"
+                // script: "checkstatus();indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();$api.attr($api.byId('avatar'),'src','" + ret2.data.avatar + "')"
+                script: "checkstatus();indexSetting.userinfo=$api.getStorage('userinfo');api.refreshHeaderLoading();$api.attr($api.byId('avatar'),'src','../image/liulangnan.png')"
             });
             if (indexSetting.from == 'book') {
                 api.execScript({
@@ -280,9 +308,8 @@ function login() {
             }
             back();
         } else {
-
 			toast.fail({
-				title:ret2.error,
+				title:ret2.msg,
 				duration:2000
 			})
         }

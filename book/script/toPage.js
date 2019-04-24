@@ -46,6 +46,7 @@ $(function () {
     }
 
     function page_change1(data) {
+      console.log(JSON.stringify(data));
       var $total_item=data.total;
         data=data.chapters;
         var keys=getKeys(data);
